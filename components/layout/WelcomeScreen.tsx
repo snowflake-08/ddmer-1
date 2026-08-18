@@ -6,6 +6,7 @@ import { useConfigValue, useConfigJson } from "@/components/providers/SiteConfig
 import { siteConfig } from "@/siteConfig";
 
 const SESSION_KEY = "welcome-shown";
+const PWD_AUTH_KEY = "siteAuth";
 
 function getTimeGreeting() {
   const now = new Date();
@@ -20,21 +21,33 @@ function getTimeGreeting() {
 
 export default function WelcomeScreen() {
   const [show, setShow] = useState(false);
+  const [pwdInput, setPwdInput] = useState("");
+  const [showPwdError, setShowPwdError] = useState(false);
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
+  const CORRECT_PWD = "0615";
 
   useEffect(() => {
-    if (!sessionStorage.getItem(SESSION_KEY)) {
-      setShow(true);
+    // 已经验证过密码的用户直接跳过欢迎页
+    if(localStorage.getItem(PWD_AUTH_KEY) === "passed") {
+Storage.getItem(SESSION_KEY)) {
+      set      return
+    }
+    if (!sessionShow(true);
       sessionStorage.setItem(SESSION_KEY, "1");
     }
   }, []);
 
-  useEffect(() => {
-    if (!show) return;
-    const timer = setTimeout(() => setShow(false), 3500);
-    return () => clearTimeout(timer);
-  }, [show]);
+  // 删掉原来自动3.5秒退场的逻辑，改成密码验证通过才退场
+  const handlePwdVerify = () => {
+    if(pwdInput === CORRECT_PWD) {
+      localStorage.setItem(PWD_AUTH_KEY, "passed")
+      setShow(false)
+    } else {
+      setShowPwdError(true)
+      setPwdInput("")
+    }
+  }
 
   const bgImage = bgImages[0] || siteConfig.bgImages[0];
 
@@ -127,6 +140,28 @@ export default function WelcomeScreen() {
               exit={{ width: 0, opacity: 0 }}
               transition={{ delay: 2.2, duration: 0.6 }}
             />
+
+            {/* 新增：生日密码提示+输入框 */}
+            <motion.div
+              className="mt-8"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 2.6, duration: 0.6 }}
+            >
+              <p className="text-sm text-slate-400 mb-4">请输入我的四位生日以访问小站：</p>
+              <input
+                type="password"
+                maxLength={4}
+                value={pwdInput}
+                onChange={(e) => setPwdInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handlePwdVerify()}
+                placeholder="四位生日"
+                className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
+                style={{ WebkitTextSecurity: "disc" }}
+              />
+              {showPwdError && <p className="mt-3 text-red-400 text-sm">密码错误，请重新输入</p>}
+            </motion.div>
           </div>
         </motion.div>
       )}
