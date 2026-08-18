@@ -80,6 +80,120 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSerifSC.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+        {/* 密码验证层 密码固定为0615 */}
+  <div 
+    className="password-overlay" 
+    id="passwordOverlay" 
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'rgba(255, 255, 255, 0.95)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 99999
+    }}
+  >
+    <div 
+      className="password-box" 
+      style={{
+        background: '#ffffff',
+        padding: '40px 50px',
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
+        minWidth: '320px'
+      }}
+    >
+      <h2 style={{ color: '#333', marginBottom: '25px', fontWeight: 500 }}>请输入密码</h2>
+      <input 
+        id="pwdInput" 
+        type="password" 
+        maxLength={4} 
+        placeholder="四位生日"
+        style={{
+          width: '100%',
+          padding: '12px 16px',
+          fontSize: '18px',
+          border: '2px solid #e5e7eb',
+          borderRadius: '8px',
+          textAlign: 'center',
+          letterSpacing: '8px',
+          outline: 'none'
+        }}
+      />
+      <button 
+        id="confirmBtn"
+        style={{
+          marginTop: '20px',
+          width: '100%',
+          padding: '12px',
+          background: '#6366f1',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          fontSize: '16px',
+          cursor: 'pointer'
+        }}
+      >
+        确认进入
+      </button>
+      <div 
+        id="errorTip" 
+        style={{
+          marginTop: '15px',
+          color: '#ef4444',
+          fontSize: '14px',
+          display: 'none'
+        }}
+      >
+        密码错误，请重新输入
+      </div>
+    </div>
+  </div>
+  <script 
+    dangerouslySetInnerHTML={{
+      __html: `
+        // 密码已预设为你的生日0615
+        const CORRECT_PWD = "0615";
+        const overlay = document.getElementById('passwordOverlay');
+        const pwdInput = document.getElementById('pwdInput');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const errorTip = document.getElementById('errorTip');
+
+        // 点击确认按钮验证密码
+        confirmBtn.addEventListener('click', checkPassword);
+        // 按回车键也可以直接提交验证
+        pwdInput.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter') checkPassword();
+        })
+
+        function checkPassword() {
+          if(pwdInput.value === CORRECT_PWD) {
+            // 密码正确，移除验证层，显示完整网站
+            overlay.style.display = 'none';
+            // 记住验证状态24小时，下次打开网站不用重新输密码
+            localStorage.setItem('siteAuth', 'passed');
+          } else {
+            // 密码错误，清空输入框提示重新输入
+            errorTip.style.display = 'block';
+            pwdInput.value = '';
+            pwdInput.focus();
+          }
+        }
+
+        // 已经验证过的用户直接跳过密码页
+        if(localStorage.getItem('siteAuth') === 'passed') {
+          overlay.style.display = 'none';
+        }
+      `
+    }}
+  />
+  {/* 密码验证代码结束，下面原有代码完全不动 */}
+
       <body className="min-h-full flex flex-col font-sans">
         <SiteConfigProvider initialConfig={dbConfig}>
           <ThemeProvider>
