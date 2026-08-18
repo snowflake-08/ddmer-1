@@ -30,15 +30,15 @@ export default function WelcomeScreen() {
   useEffect(() => {
     // 已经验证过密码的用户直接跳过欢迎页
     if(localStorage.getItem(PWD_AUTH_KEY) === "passed") {
-Storage.getItem(SESSION_KEY)) {
-      set      return
+      return
     }
-    if (!sessionShow(true);
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+      setShow(true);
       sessionStorage.setItem(SESSION_KEY, "1");
     }
   }, []);
 
-  // 删掉原来自动3.5秒退场的逻辑，改成密码验证通过才退场
+  // 密码验证逻辑
   const handlePwdVerify = () => {
     if(pwdInput === CORRECT_PWD) {
       localStorage.setItem(PWD_AUTH_KEY, "passed")
@@ -141,7 +141,7 @@ Storage.getItem(SESSION_KEY)) {
               transition={{ delay: 2.2, duration: 0.6 }}
             />
 
-            {/* 新增：生日密码提示+输入框 */}
+            {/* 生日密码提示+输入框 */}
             <motion.div
               className="mt-8"
               initial={{ opacity: 0, y: 10 }}
