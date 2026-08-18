@@ -5,9 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useConfigValue, useConfigJson } from "@/components/providers/SiteConfigProvider";
 import { siteConfig } from "@/siteConfig";
 
-const SESSION_KEY = "welcome-shown";
-const PWD_AUTH_KEY = "siteAuth";
-
 function getTimeGreeting() {
   const now = new Date();
   const h = now.getHours();
@@ -20,28 +17,18 @@ function getTimeGreeting() {
 }
 
 export default function WelcomeScreen() {
-  const [show, setShow] = useState(false);
+  // 初始状态直接强制显示欢迎密码页，没有任何本地缓存跳过逻辑
+  const [show, setShow] = useState(true);
   const [pwdInput, setPwdInput] = useState("");
   const [showPwdError, setShowPwdError] = useState(false);
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
   const CORRECT_PWD = "0615";
 
-  useEffect(() => {
-    // 已经验证过密码的用户直接跳过欢迎页
-    if(localStorage.getItem(PWD_AUTH_KEY) === "passed") {
-      return
-    }
-    if (!sessionStorage.getItem(SESSION_KEY)) {
-      setShow(true);
-      sessionStorage.setItem(SESSION_KEY, "1");
-    }
-  }, []);
-
-  // 密码验证逻辑
+  // 完全删掉localStorage记住密码的逻辑，每次打开页面都强制显示密码页
   const handlePwdVerify = () => {
     if(pwdInput === CORRECT_PWD) {
-      localStorage.setItem(PWD_AUTH_KEY, "passed")
+      // 只在当前页面会话临时放行，刷新页面就失效
       setShow(false)
     } else {
       setShowPwdError(true)
