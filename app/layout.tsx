@@ -80,7 +80,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSerifSC.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-        {/* 密码验证层 密码固定为0615 */}
+          {/* 密码验证层 密码0615 完全隐藏后台网站内容 */}
   <div 
     className="password-overlay" 
     id="passwordOverlay" 
@@ -90,7 +90,8 @@ export default async function RootLayout({
       left: 0,
       width: '100vw',
       height: '100vh',
-      background: 'rgba(255, 255, 255, 0.95)',
+      // 改成100%不透明纯白色，完全挡住后面所有网站内容
+      background: '#ffffff',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -121,6 +122,8 @@ export default async function RootLayout({
           border: '2px solid #e5e7eb',
           borderRadius: '8px',
           textAlign: 'center',
+          // 强制密码字符显示为圆点，完全隐藏输入的数字
+          WebkitTextSecurity: 'disc',
           letterSpacing: '8px',
           outline: 'none'
         }}
@@ -157,42 +160,35 @@ export default async function RootLayout({
   <script 
     dangerouslySetInnerHTML={{
       __html: `
-        // 密码已预设为你的生日0615
         const CORRECT_PWD = "0615";
         const overlay = document.getElementById('passwordOverlay');
         const pwdInput = document.getElementById('pwdInput');
         const confirmBtn = document.getElementById('confirmBtn');
         const errorTip = document.getElementById('errorTip');
 
-        // 点击确认按钮验证密码
         confirmBtn.addEventListener('click', checkPassword);
-        // 按回车键也可以直接提交验证
         pwdInput.addEventListener('keydown', (e) => {
           if(e.key === 'Enter') checkPassword();
         })
 
         function checkPassword() {
           if(pwdInput.value === CORRECT_PWD) {
-            // 密码正确，移除验证层，显示完整网站
             overlay.style.display = 'none';
-            // 记住验证状态24小时，下次打开网站不用重新输密码
             localStorage.setItem('siteAuth', 'passed');
           } else {
-            // 密码错误，清空输入框提示重新输入
             errorTip.style.display = 'block';
             pwdInput.value = '';
             pwdInput.focus();
           }
         }
 
-        // 已经验证过的用户直接跳过密码页
         if(localStorage.getItem('siteAuth') === 'passed') {
           overlay.style.display = 'none';
         }
       `
     }}
   />
-  {/* 密码验证代码结束，下面原有代码完全不动 */}
+  {/* 密码验证代码结束 */}
 
       <body className="min-h-full flex flex-col font-sans">
         <SiteConfigProvider initialConfig={dbConfig}>
