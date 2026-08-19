@@ -227,7 +227,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    生日错误❌，快去我朋友圈置顶💢
+                    ❌生日错误，快去看我朋友圈置顶💢
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -246,7 +246,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    谢谢你还记得我的生日
+                    🌹✅谢谢你还记得我的生日！😊
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -265,7 +265,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    欢迎！👋
+                    😘 欢迎！👋
                   </motion.p>
                 )}
               </AnimatePresence>
