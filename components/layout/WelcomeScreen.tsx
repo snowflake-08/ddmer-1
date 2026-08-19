@@ -163,30 +163,58 @@ export default function WelcomeScreen() {
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
-              {showPwdError && <p className="mt-3 text-red-400 text-sm">生日错误❌，快去看我朋友圈置顶💢</p>}
-              {/* 绿色成功提示，和页面其他文字保持一致的淡入上浮动画 */}
+              {/* 生日错误提示，带弹性回弹动画 */}
+              <AnimatePresence>
+                {showPwdError && (
+                  <motion.p
+                    className="mt-3 text-red-400 text-sm"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 15,
+                      duration: 0.5 
+                    }}
+                  >
+                    生日错误❌，快去我朋友圈置顶💢
+                  </motion.p>
+                )}
+              </AnimatePresence>
+              {/* 绿色成功提示，带弹性回弹动画 */}
               <AnimatePresence>
                 {showPwdSuccess && (
                   <motion.p
                     className="mt-3 text-green-400 text-sm"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 15,
+                      duration: 0.5 
+                    }}
                   >
                     谢谢你还记得我的生日
                   </motion.p>
                 )}
               </AnimatePresence>
-              {/* 后续弹出的欢迎文字，复用完全相同的动画风格 */}
+              {/* 后续弹出的欢迎文字，带弹性回弹动画 */}
               <AnimatePresence>
                 {showWelcomeText && (
                   <motion.p
                     className="mt-2 text-green-300 text-base font-medium"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 15,
+                      duration: 0.5 
+                    }}
                   >
                     欢迎！👋
                   </motion.p>
