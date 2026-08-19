@@ -26,6 +26,8 @@ export default function WelcomeScreen() {
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
   const CORRECT_PWD = "0615";
+  const PHONE_NUM = "15636176689";
+  const EMAIL_ADDR = "180877972@qq.com";
 
   // 完全删掉localStorage记住密码的逻辑，每次打开页面都强制显示密码页
   const handlePwdVerify = () => {
@@ -44,6 +46,18 @@ export default function WelcomeScreen() {
       setShowPwdError(true);
       setPwdInput("");
     }
+  }
+
+  // 点击电话图标：自动复制手机号到剪贴板，同时唤起拨号选择
+  const handlePhoneClick = async () => {
+    try {
+      await navigator.clipboard.writeText(PHONE_NUM);
+      alert(`手机号 ${PHONE_NUM} 已复制到剪贴板，你可以选择拨号或者添加联系人~`);
+    } catch (e) {
+      // 低版本浏览器兼容降级
+      alert(`你的手机号是：${PHONE_NUM}`);
+    }
+    window.open(`tel:${PHONE_NUM}`);
   }
 
   const bgImage = bgImages[0] || siteConfig.bgImages[0];
@@ -163,11 +177,46 @@ export default function WelcomeScreen() {
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
+
+              {/* 陌生人联系模块，和输入框同步入场，延迟比输入框晚0.3秒，动画节奏完全衔接 */}
+              <motion.div
+                className="mt-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 2.9, duration: 0.5 }}
+              >
+                <p className="text-xs text-slate-400 mb-3">如果您还未添加我，可以点击下方手机或邮箱留言哦！</p>
+                <div className="flex items-center justify-center space-x-6">
+                  {/* 电话图标 */}
+                  <button
+                    onClick={handlePhoneClick}
+                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                    title="点击复制手机号并拨号"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sky-400">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                  </button>
+                  {/* 邮箱图标 */}
+                  <a
+                    href={`mailto:${EMAIL_ADDR}`}
+                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                    title="点击发送邮件"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sky-400">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </a>
+                </div>
+              </motion.div>
+
               {/* 生日错误提示，带弹性回弹动画 */}
               <AnimatePresence>
                 {showPwdError && (
                   <motion.p
-                    className="mt-3 text-red-400 text-sm"
+                    className="mt-4 text-red-400 text-sm"
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0 }}
@@ -178,7 +227,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    生日错误❌，快去看我朋友圈置顶💢
+                    生日错误❌，快去我朋友圈置顶💢
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -186,7 +235,7 @@ export default function WelcomeScreen() {
               <AnimatePresence>
                 {showPwdSuccess && (
                   <motion.p
-                    className="mt-3 text-green-400 text-sm"
+                    className="mt-4 text-green-400 text-sm"
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0 }}
@@ -197,7 +246,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    🌹谢谢你还记得我的生日😊
+                    谢谢你还记得我的生日
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -216,7 +265,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    😘 欢迎！👋
+                    欢迎！👋
                   </motion.p>
                 )}
               </AnimatePresence>
