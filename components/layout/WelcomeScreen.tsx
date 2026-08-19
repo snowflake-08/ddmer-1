@@ -157,7 +157,7 @@ export default function WelcomeScreen() {
                 style={{ WebkitTextSecurity: "disc" }}
               />
               {showPwdError && <p className="mt-3 text-red-400 text-sm">生日错误❌，快去我朋友圈置顶💢</p>}
-              {showPwdSuccess && <p className="mt-3 text-green-400 text-sm">谢谢你还记得我的生日</p>}
+              {showPwdSuccess && <p className="mt-3 text-green-400 text-sm">谢谢你还记得我的生日🤭，欢迎！👋</p>}
             </motion.div>
           </div>
         </motion.div>
