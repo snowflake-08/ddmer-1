@@ -24,6 +24,7 @@ export default function WelcomeScreen() {
   const [showPwdSuccess, setShowPwdSuccess] = useState(false);
   const [showWelcomeText, setShowWelcomeText] = useState(false);
   const [showPhoneActionModal, setShowPhoneActionModal] = useState(false);
+  const [showEmailConfirmModal, setShowEmailConfirmModal] = useState(false);
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
   const CORRECT_PWD = "0615";
@@ -75,6 +76,18 @@ export default function WelcomeScreen() {
   const handleCallPhone = () => {
     window.open(`tel:${PHONE_NUM}`);
     setShowPhoneActionModal(false);
+  }
+
+  // 点击邮箱图标：弹出确认弹窗
+  const handleEmailClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowEmailConfirmModal(true);
+  }
+
+  // 确认发送邮件：打开邮件客户端
+  const handleConfirmSendEmail = () => {
+    window.open(`mailto:${EMAIL_ADDR}`);
+    setShowEmailConfirmModal(false);
   }
 
   const bgImage = bgImages[0] || siteConfig.bgImages[0];
@@ -218,6 +231,7 @@ export default function WelcomeScreen() {
                   {/* 邮箱图标 */}
                   <a
                     href={`mailto:${EMAIL_ADDR}`}
+                    onClick={handleEmailClick}
                     className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
                     title="点击发送邮件"
                   >
@@ -334,6 +348,52 @@ export default function WelcomeScreen() {
                       className="w-full py-2 text-slate-400 text-sm mt-1"
                     >
                       取消
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* 邮件确认弹窗 */}
+          <AnimatePresence>
+            {showEmailConfirmModal && (
+              <>
+                {/* 弹窗半透明遮罩 */}
+                <motion.div
+                  className="absolute inset-0 bg-black/60 z-[100000]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowEmailConfirmModal(false)}
+                />
+                {/* 弹窗主体 */}
+                <motion.div
+                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] w-72 bg-slate-900 border border-white/10 rounded-2xl p-6 text-center"
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 20,
+                    duration: 0.4 
+                  }}
+                >
+                  <p className="text-white text-base mb-2">是否要发送邮件给：</p>
+                  <p className="text-sky-400 text-lg font-medium mb-6">{EMAIL_ADDR}？</p>
+                  <div className="flex flex-col space-y-3">
+                    <button
+                      onClick={handleConfirmSendEmail}
+                      className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition-colors duration-200"
+                    >
+                      是
+                    </button>
+                    <button
+                      onClick={() => setShowEmailConfirmModal(false)}
+                      className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors duration-200"
+                    >
+                      否
                     </button>
                   </div>
                 </motion.div>
