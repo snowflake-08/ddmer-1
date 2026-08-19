@@ -136,7 +136,7 @@ export default function WelcomeScreen() {
               exit={{ opacity: 0 }}
               transition={{ delay: 2.6, duration: 0.6 }}
             >
-              <p className="text-sm text-slate-400 mb-4">请输入我的四位生日以访问小站，*如“0101”：</p>
+              <p className="text-sm text-slate-400 mb-4">看看你还记不记得我的生日，*如“0101”：</p>
               <input
                 type="password"
                 maxLength={4}
