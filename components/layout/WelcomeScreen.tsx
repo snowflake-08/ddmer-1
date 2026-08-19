@@ -191,7 +191,7 @@ export default function WelcomeScreen() {
               exit={{ opacity: 0 }}
               transition={{ delay: 2.6, duration: 0.6 }}
             >
-              <p className="text-sm text-slate-400 mb-4">看看你还记不记得我的生日：月+日</p>
+              <p className="text-sm text-slate-400 mb-4">看看你还记不记得我的生日😉：月+日</p>
               <input
                 type="password"
                 maxLength={4}
@@ -259,7 +259,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    生日错误❌，快去我朋友圈置顶💢
+                    ❌生日错误，快去我朋友圈置顶💢
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -278,7 +278,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    谢谢你还记得我的生日
+                    🌹谢谢你还记得我的生日😊
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -297,7 +297,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    欢迎！👋
+                    😘 欢迎！👋
                   </motion.p>
                 )}
               </AnimatePresence>
