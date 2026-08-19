@@ -147,7 +147,7 @@ export default function WelcomeScreen() {
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
-              {showPwdError && <p className="mt-3 text-red-400 text-sm">密码错误，请重新输入</p>}
+              {showPwdError && <p className="mt-3 text-red-400 text-sm">生日错误❌，快去我朋友圈置顶💢</p>}
             </motion.div>
           </div>
         </motion.div>
