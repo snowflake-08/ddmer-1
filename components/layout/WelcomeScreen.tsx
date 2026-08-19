@@ -55,12 +55,13 @@ export default function WelcomeScreen() {
     setShowPhoneActionModal(true);
   }
 
-  // 复制手机号功能
+  // 复制手机号功能，全浏览器兼容
   const handleCopyPhone = async () => {
     try {
       await navigator.clipboard.writeText(PHONE_NUM);
       alert(`手机号 ${PHONE_NUM} 已成功复制到剪贴板`);
     } catch (e) {
+      // 低版本浏览器兼容降级方案
       const input = document.createElement('input');
       input.value = PHONE_NUM;
       document.body.appendChild(input);
@@ -72,21 +73,21 @@ export default function WelcomeScreen() {
     setShowPhoneActionModal(false);
   }
 
-  // 直接唤起拨号功能
+  // 系统级原生唤起拨号App，完全跳过浏览器中转
   const handleCallPhone = () => {
-    window.open(`tel:${PHONE_NUM}`);
+    window.location.href = `tel:${PHONE_NUM}`;
     setShowPhoneActionModal(false);
   }
 
-  // 点击邮箱图标：弹出确认弹窗
+  // 点击邮箱图标：拦截默认跳转，弹出确认弹窗
   const handleEmailClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowEmailConfirmModal(true);
   }
 
-  // 确认发送邮件：打开邮件客户端
+  // 确认发送邮件：系统级原生唤起邮件App，完全跳过浏览器中转
   const handleConfirmSendEmail = () => {
-    window.open(`mailto:${EMAIL_ADDR}`);
+    window.location.href = `mailto:${EMAIL_ADDR}`;
     setShowEmailConfirmModal(false);
   }
 
@@ -102,7 +103,7 @@ export default function WelcomeScreen() {
           exit={{ opacity: 0, pointerEvents: "none" }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
         >
-          {/* 背景 */}
+          {/* 背景层 */}
           <motion.div
             className="absolute inset-0 bg-slate-950"
             exit={{ scale: 1.1 }}
@@ -121,9 +122,9 @@ export default function WelcomeScreen() {
             transition={{ duration: 1.2 }}
           />
 
-          {/* 内容 */}
+          {/* 主内容区域 */}
           <div className="relative z-10 text-center px-6">
-            {/* 欢迎来到 */}
+            {/* 欢迎来到 入场动画 */}
             <motion.p
               className="text-lg md:text-xl text-slate-400 mb-4 tracking-[0.3em]"
               initial={{ opacity: 0, y: 10 }}
@@ -134,7 +135,7 @@ export default function WelcomeScreen() {
               欢迎来到
             </motion.p>
 
-            {/* 站名 */}
+            {/* 站名 入场动画 */}
             <motion.div
               className="flex items-center justify-center space-x-1 mb-4"
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -162,7 +163,7 @@ export default function WelcomeScreen() {
               </span>
             </motion.div>
 
-            {/* 时间问候 */}
+            {/* 时间问候 入场动画 */}
             <motion.p
               className="text-sm md:text-base text-slate-500 tracking-wider"
               initial={{ opacity: 0, y: 10 }}
@@ -173,7 +174,7 @@ export default function WelcomeScreen() {
               {getTimeGreeting()}
             </motion.p>
 
-            {/* 装饰线 */}
+            {/* 装饰线 入场动画 */}
             <motion.div
               className="mx-auto mt-8 h-px bg-gradient-to-r from-transparent via-sky-500/40 to-transparent"
               initial={{ width: 0, opacity: 0 }}
@@ -182,7 +183,7 @@ export default function WelcomeScreen() {
               transition={{ delay: 2.2, duration: 0.6 }}
             />
 
-            {/* 生日密码提示+输入框 */}
+            {/* 密码输入区域 */}
             <motion.div
               className="mt-8"
               initial={{ opacity: 0, y: 10 }}
@@ -208,7 +209,7 @@ export default function WelcomeScreen() {
                 style={{ WebkitTextSecurity: "disc" }}
               />
 
-              {/* 陌生人联系模块，和输入框同步入场，延迟比输入框晚0.3秒，动画节奏完全衔接 */}
+              {/* 陌生人联系模块，和输入框同步依次入场 */}
               <motion.div
                 className="mt-4"
                 initial={{ opacity: 0, y: 10 }}
@@ -243,7 +244,7 @@ export default function WelcomeScreen() {
                 </div>
               </motion.div>
 
-              {/* 生日错误提示，带弹性回弹动画 */}
+              {/* 生日错误提示 弹性回弹动画 */}
               <AnimatePresence>
                 {showPwdError && (
                   <motion.p
@@ -262,7 +263,7 @@ export default function WelcomeScreen() {
                   </motion.p>
                 )}
               </AnimatePresence>
-              {/* 绿色成功提示，带弹性回弹动画 */}
+              {/* 密码正确成功提示 弹性回弹动画 */}
               <AnimatePresence>
                 {showPwdSuccess && (
                   <motion.p
@@ -281,7 +282,7 @@ export default function WelcomeScreen() {
                   </motion.p>
                 )}
               </AnimatePresence>
-              {/* 后续弹出的欢迎文字，带弹性回弹动画 */}
+              {/* 欢迎文字提示 弹性回弹动画 */}
               <AnimatePresence>
                 {showWelcomeText && (
                   <motion.p
@@ -303,11 +304,10 @@ export default function WelcomeScreen() {
             </motion.div>
           </div>
 
-          {/* 自定义双选项电话操作弹窗 */}
+          {/* 电话操作双选项弹窗 */}
           <AnimatePresence>
             {showPhoneActionModal && (
               <>
-                {/* 弹窗半透明遮罩 */}
                 <motion.div
                   className="absolute inset-0 bg-black/60 z-[100000]"
                   initial={{ opacity: 0 }}
@@ -315,7 +315,6 @@ export default function WelcomeScreen() {
                   exit={{ opacity: 0 }}
                   onClick={() => setShowPhoneActionModal(false)}
                 />
-                {/* 弹窗主体 */}
                 <motion.div
                   className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] w-72 bg-slate-900 border border-white/10 rounded-2xl p-6 text-center"
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -359,7 +358,6 @@ export default function WelcomeScreen() {
           <AnimatePresence>
             {showEmailConfirmModal && (
               <>
-                {/* 弹窗半透明遮罩 */}
                 <motion.div
                   className="absolute inset-0 bg-black/60 z-[100000]"
                   initial={{ opacity: 0 }}
@@ -367,7 +365,6 @@ export default function WelcomeScreen() {
                   exit={{ opacity: 0 }}
                   onClick={() => setShowEmailConfirmModal(false)}
                 />
-                {/* 弹窗主体 */}
                 <motion.div
                   className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] w-72 bg-slate-900 border border-white/10 rounded-2xl p-6 text-center"
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
