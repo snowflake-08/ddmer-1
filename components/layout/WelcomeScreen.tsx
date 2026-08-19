@@ -21,6 +21,7 @@ export default function WelcomeScreen() {
   const [show, setShow] = useState(true);
   const [pwdInput, setPwdInput] = useState("");
   const [showPwdError, setShowPwdError] = useState(false);
+  const [showPwdSuccess, setShowPwdSuccess] = useState(false);
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
   const CORRECT_PWD = "0615";
@@ -28,11 +29,14 @@ export default function WelcomeScreen() {
   // 完全删掉localStorage记住密码的逻辑，每次打开页面都强制显示密码页
   const handlePwdVerify = () => {
     if(pwdInput === CORRECT_PWD) {
-      // 只在当前页面会话临时放行，刷新页面就失效
-      setShow(false)
+      setShowPwdSuccess(true);
+      // 1.5秒延迟后再放行进入主站，刷新页面就失效
+      setTimeout(() => {
+        setShow(false);
+      }, 1500);
     } else {
-      setShowPwdError(true)
-      setPwdInput("")
+      setShowPwdError(true);
+      setPwdInput("");
     }
   }
 
@@ -141,13 +145,19 @@ export default function WelcomeScreen() {
                 type="password"
                 maxLength={4}
                 value={pwdInput}
-                onChange={(e) => setPwdInput(e.target.value)}
+                onChange={(e) => {
+                  setPwdInput(e.target.value);
+                  // 输入新内容时自动清空之前的错误/成功提示
+                  setShowPwdError(false);
+                  setShowPwdSuccess(false);
+                }}
                 onKeyDown={(e) => e.key === "Enter" && handlePwdVerify()}
                 placeholder="如:0101"
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
               {showPwdError && <p className="mt-3 text-red-400 text-sm">生日错误❌，快去我朋友圈置顶💢</p>}
+              {showPwdSuccess && <p className="mt-3 text-green-400 text-sm">谢谢你还记得我的生日</p>}
             </motion.div>
           </div>
         </motion.div>
