@@ -22,6 +22,7 @@ export default function WelcomeScreen() {
   const [pwdInput, setPwdInput] = useState("");
   const [showPwdError, setShowPwdError] = useState(false);
   const [showPwdSuccess, setShowPwdSuccess] = useState(false);
+  const [showWelcomeText, setShowWelcomeText] = useState(false);
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
   const CORRECT_PWD = "0615";
@@ -29,11 +30,16 @@ export default function WelcomeScreen() {
   // 完全删掉localStorage记住密码的逻辑，每次打开页面都强制显示密码页
   const handlePwdVerify = () => {
     if(pwdInput === CORRECT_PWD) {
+      // 第一步：先显示绿色成功提示
       setShowPwdSuccess(true);
-      // 1.5秒延迟后再放行进入主站，刷新页面就失效
+      // 第二步：间隔0.8秒后用动画弹出"欢迎！👋"
+      setTimeout(() => {
+        setShowWelcomeText(true);
+      }, 800);
+      // 第三步：总时长1.8秒后再执行淡出动画进入主站，节奏自然不仓促
       setTimeout(() => {
         setShow(false);
-      }, 1500);
+      }, 1800);
     } else {
       setShowPwdError(true);
       setPwdInput("");
@@ -147,17 +153,45 @@ export default function WelcomeScreen() {
                 value={pwdInput}
                 onChange={(e) => {
                   setPwdInput(e.target.value);
-                  // 输入新内容时自动清空之前的错误/成功提示
+                  // 输入新内容时自动清空所有提示状态
                   setShowPwdError(false);
                   setShowPwdSuccess(false);
+                  setShowWelcomeText(false);
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handlePwdVerify()}
                 placeholder="如:0101"
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
-              {showPwdError && <p className="mt-3 text-red-400 text-sm">生日错误❌，快去我朋友圈置顶💢</p>}
-              {showPwdSuccess && <p className="mt-3 text-green-400 text-sm">谢谢你还记得我的生日🤭，欢迎！👋</p>}
+              {showPwdError && <p className="mt-3 text-red-400 text-sm">生日错误❌，快去看我朋友圈置顶💢</p>}
+              {/* 绿色成功提示，和页面其他文字保持一致的淡入上浮动画 */}
+              <AnimatePresence>
+                {showPwdSuccess && (
+                  <motion.p
+                    className="mt-3 text-green-400 text-sm"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    谢谢你还记得我的生日
+                  </motion.p>
+                )}
+              </AnimatePresence>
+              {/* 后续弹出的欢迎文字，复用完全相同的动画风格 */}
+              <AnimatePresence>
+                {showWelcomeText && (
+                  <motion.p
+                    className="mt-2 text-green-300 text-base font-medium"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    欢迎！👋
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
         </motion.div>
