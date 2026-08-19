@@ -143,7 +143,7 @@ export default function WelcomeScreen() {
                 value={pwdInput}
                 onChange={(e) => setPwdInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handlePwdVerify()}
-                placeholder="月+日，如：0101"
+                placeholder="月+日,如:0101"
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
