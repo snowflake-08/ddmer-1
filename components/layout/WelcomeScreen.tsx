@@ -23,6 +23,7 @@ export default function WelcomeScreen() {
   const [showPwdError, setShowPwdError] = useState(false);
   const [showPwdSuccess, setShowPwdSuccess] = useState(false);
   const [showWelcomeText, setShowWelcomeText] = useState(false);
+  const [showPhoneActionModal, setShowPhoneActionModal] = useState(false);
   const authorName = useConfigValue("authorName", siteConfig.authorName);
   const bgImages = useConfigJson<string[]>("bgImages", siteConfig.bgImages);
   const CORRECT_PWD = "0615";
@@ -48,16 +49,32 @@ export default function WelcomeScreen() {
     }
   }
 
-  // 点击电话图标：自动复制手机号到剪贴板，同时唤起拨号选择
-  const handlePhoneClick = async () => {
+  // 点击电话图标：弹出自定义双选项弹窗
+  const handlePhoneClick = () => {
+    setShowPhoneActionModal(true);
+  }
+
+  // 复制手机号功能
+  const handleCopyPhone = async () => {
     try {
       await navigator.clipboard.writeText(PHONE_NUM);
-      alert(`手机号 ${PHONE_NUM} 已复制到剪贴板，你可以选择拨号或者添加联系人~`);
+      alert(`手机号 ${PHONE_NUM} 已成功复制到剪贴板`);
     } catch (e) {
-      // 低版本浏览器兼容降级
-      alert(`你的手机号是：${PHONE_NUM}`);
+      const input = document.createElement('input');
+      input.value = PHONE_NUM;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      alert(`手机号 ${PHONE_NUM} 已成功复制到剪贴板`);
     }
+    setShowPhoneActionModal(false);
+  }
+
+  // 直接唤起拨号功能
+  const handleCallPhone = () => {
     window.open(`tel:${PHONE_NUM}`);
+    setShowPhoneActionModal(false);
   }
 
   const bgImage = bgImages[0] || siteConfig.bgImages[0];
@@ -192,7 +209,7 @@ export default function WelcomeScreen() {
                   <button
                     onClick={handlePhoneClick}
                     className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
-                    title="点击复制手机号并拨号"
+                    title="点击选择复制或拨打"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sky-400">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -227,7 +244,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    ❌生日错误，快去看我朋友圈置顶💢
+                    生日错误❌，快去我朋友圈置顶💢
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -246,7 +263,7 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    🌹✅谢谢你还记得我的生日！😊
+                    谢谢你还记得我的生日
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -265,12 +282,64 @@ export default function WelcomeScreen() {
                       duration: 0.5 
                     }}
                   >
-                    😘 欢迎！👋
+                    欢迎！👋
                   </motion.p>
                 )}
               </AnimatePresence>
             </motion.div>
           </div>
+
+          {/* 自定义双选项电话操作弹窗 */}
+          <AnimatePresence>
+            {showPhoneActionModal && (
+              <>
+                {/* 弹窗半透明遮罩 */}
+                <motion.div
+                  className="absolute inset-0 bg-black/60 z-[100000]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowPhoneActionModal(false)}
+                />
+                {/* 弹窗主体 */}
+                <motion.div
+                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] w-72 bg-slate-900 border border-white/10 rounded-2xl p-6 text-center"
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300, 
+                    damping: 20,
+                    duration: 0.4 
+                  }}
+                >
+                  <p className="text-white text-base mb-1">手机号</p>
+                  <p className="text-sky-400 text-lg font-medium mb-6">{PHONE_NUM}</p>
+                  <div className="flex flex-col space-y-3">
+                    <button
+                      onClick={handleCopyPhone}
+                      className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition-colors duration-200"
+                    >
+                      复制
+                    </button>
+                    <button
+                      onClick={handleCallPhone}
+                      className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors duration-200"
+                    >
+                      拨打
+                    </button>
+                    <button
+                      onClick={() => setShowPhoneActionModal(false)}
+                      className="w-full py-2 text-slate-400 text-sm mt-1"
+                    >
+                      取消
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
