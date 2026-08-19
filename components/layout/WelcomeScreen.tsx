@@ -136,14 +136,14 @@ export default function WelcomeScreen() {
               exit={{ opacity: 0 }}
               transition={{ delay: 2.6, duration: 0.6 }}
             >
-              <p className="text-sm text-slate-400 mb-4">看看你还记不记得我的生日：</p>
+              <p className="text-sm text-slate-400 mb-4">看看你还记不记得我的生日：月+日</p>
               <input
                 type="password"
                 maxLength={4}
                 value={pwdInput}
                 onChange={(e) => setPwdInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handlePwdVerify()}
-                placeholder="月+日,如:0101"
+                placeholder="如:0101"
                 className="w-64 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-center text-xl tracking-[0.8em] text-white outline-none focus:border-sky-400"
                 style={{ WebkitTextSecurity: "disc" }}
               />
