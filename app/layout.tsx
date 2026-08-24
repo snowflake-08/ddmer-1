@@ -106,6 +106,7 @@ export default async function RootLayout({
             </EffectProvider>
           </ThemeProvider>
         </SiteConfigProvider>
+        <a href="https://icp.gov.moe/?keyword=20260356" target="_blank">萌ICP备20260356号</a>
       </body>
     </html>
   );
