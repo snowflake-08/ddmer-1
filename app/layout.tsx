@@ -135,26 +135,57 @@ function initFollowBtn() {
       panel = document.createElement('div')
       panel.id = 'subscribe-panel'
       panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 10000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; width: 280px;"
-      
-     const notifyBtn = document.createElement('button')
-     notifyBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; border: none; cursor: pointer;"
-     notifyBtn.innerText = '🔔 开启浏览器更新通知'
-     notifyBtn.onclick = async function(){
-  if (!('Notification' in window)) {
-    alert('你的浏览器不支持原生通知功能，可以换用Chrome/Edge等主流浏览器打开')
-    return
-  }
-  const permission = await Notification.requestPermission()
-  if (permission === 'granted') {
-    new Notification('订阅成功🎉', {
-      body: '之后博客更新你会第一时间收到浏览器推送通知，不用手动刷新网站',
-      icon: 'https://snowflake-06.cn/favicon.ico'
+
+      const notifyBtn = document.createElement('button')
+      notifyBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; border: none; cursor: pointer;"
+      notifyBtn.innerText = '🔔 开启浏览器更新通知'
+      notifyBtn.onclick = async function(){
+        if (!('Notification' in window)) {
+          alert('你的浏览器不支持原生通知功能，可以换用Chrome/Edge等主流浏览器打开')
+          return
+        }
+        const permission = await Notification.requestPermission()
+        if (permission === 'granted') {
+          new Notification('订阅成功🎉', {
+            body: '之后博客更新你会第一时间收到浏览器推送通知，不用手动刷新网站',
+            icon: 'https://snowflake-06.cn/favicon.ico'
+          })
+          alert('✅ 浏览器更新通知已成功开启！之后有新文章会直接推送到你的桌面')
+        } else {
+          alert('你拒绝了通知权限，可以在浏览器设置里手动开启本站通知权限')
+        }
+      }
+
+      const copyBtn = document.createElement('button')
+      copyBtn.innerText = '📋 复制RSS订阅链接'
+      copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer;"
+      copyBtn.onclick = function() {
+        navigator.clipboard.writeText("https://snowflake-06.cn/feed")
+        alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
+      }
+
+      panel.appendChild(notifyBtn)
+      panel.appendChild(copyBtn)
+      document.body.appendChild(panel)
+      panel.style.display = 'none'
+    }
+
+    btn.addEventListener('click', function () {
+      panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
     })
-    alert('✅ 浏览器更新通知已成功开启！之后有新文章会直接推送到你的桌面')
-  } else {
-    alert('你拒绝了通知权限，可以在浏览器设置里手动开启本站通知权限')
+
+    btn.addEventListener('mouseenter', function () {
+      btn.style.transform = 'translateY(-3px)'
+      btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
+    })
+
+    btn.addEventListener('mouseleave', function () {
+      btn.style.transform = ''
+      btn.style.boxShadow = ''
+    })
   }
 }
+
 
       const copyBtn = document.createElement('button')
       copyBtn.innerText = '📋 复制RSS订阅链接'
