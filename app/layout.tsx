@@ -106,6 +106,75 @@ export default async function RootLayout({
             </EffectProvider>
           </ThemeProvider>
         </SiteConfigProvider>
+        <script dangerouslySetInnerHTML={{
+  __html: `
+document.addEventListener('DOMContentLoaded', function(){
+  // 直接自己创建铃铛按钮，完全不依赖页面原有元素
+  const bellBtn = document.createElement('div')
+  bellBtn.style.cssText = "position: fixed; bottom: 24px; right: 24px; z-index: 99999; padding: 12px 20px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; gap: 8px;"
+  bellBtn.innerHTML = "🔔 关注此网站以后后续收到更新推送通知"
+  document.body.appendChild(bellBtn)
+  
+  const panel = document.createElement('div')
+  panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 100000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: none; flex-direction: column; gap: 16px; width: 280px;"
+  
+  const notifyBtn = document.createElement('button')
+  notifyBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; border: none; cursor: pointer; font-size: 16px;"
+  notifyBtn.innerText = '🔔 开启浏览器更新通知'
+  notifyBtn.onclick = async function(){
+    if (!('Notification' in window)) {
+      alert('你的浏览器不支持原生通知功能，可以换用Chrome/Edge等主流浏览器打开')
+      return
+    }
+    const permission = await Notification.requestPermission()
+    if (permission === 'granted') {
+      new Notification('订阅成功🎉', {
+        body: '之后博客更新你会第一时间收到浏览器推送通知，不用手动刷新网站',
+        icon: 'https://snowflake-06.cn/favicon.ico'
+      })
+      alert('✅ 浏览器更新通知已成功开启！之后有新文章会直接推送到你的桌面')
+    } else {
+      alert('你拒绝了通知权限，可以在浏览器设置里手动开启本站通知权限')
+    }
+  }
+
+  const copyBtn = document.createElement('button')
+  copyBtn.innerText = '📋 复制RSS订阅链接'
+  copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer; font-size: 16px;"
+  copyBtn.onclick = function() {
+    navigator.clipboard.writeText("https://snowflake-06.cn/feed")
+    alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
+  }
+
+  panel.appendChild(notifyBtn)
+  panel.appendChild(copyBtn)
+  document.body.appendChild(panel)
+
+  let isPanelOpen = false
+  bellBtn.addEventListener('click', function (e) {
+    e.stopPropagation()
+    isPanelOpen = !isPanelOpen
+    panel.style.display = isPanelOpen ? 'flex' : 'none'
+  })
+  bellBtn.addEventListener('touchstart', function (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    isPanelOpen = !isPanelOpen
+    panel.style.display = isPanelOpen ? 'flex' : 'none'
+  })
+
+  document.addEventListener('click', function () {
+    isPanelOpen = false
+    panel.style.display = 'none'
+  })
+
+  panel.addEventListener('click', function (e) {
+    e.stopPropagation()
+  })
+})
+`
+}} />
+
       </body>
     </html>
   );
