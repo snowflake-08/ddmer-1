@@ -107,7 +107,7 @@ export default async function RootLayout({
           </ThemeProvider>
         </SiteConfigProvider>
         <a href="https://icp.gov.moe/?keyword=20260356" target="_blank">萌ICP备20260356号</a>
-        <div style={{
+       <div id="global-follow-btn" style={{
   position: 'fixed',
   bottom: '24px',
   right: '24px',
@@ -119,23 +119,31 @@ export default async function RootLayout({
   cursor: 'pointer',
   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
   transition: 'all 0.3s ease'
-}}
-onClick={() => {
-  window.open('/feed', '_blank')
-}}
-onMouseEnter={(e) => {
-  (e.target as HTMLElement).style.transform = 'translateY(-3px)'
-  ;(e.target as HTMLElement).style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
-}}
-onMouseLeave={(e) => {
-  (e.target as HTMLElement).style.transform = 'translateY(0)'
-  ;(e.target as HTMLElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'
 }}>
   <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
     <span style={{fontSize: '22px'}}>🔔</span>
     <span style={{fontSize: '14px', color: '#2c3e50', fontWeight: 500}}>关注此网站以后续收到更新推送通知</span>
   </div>
 </div>
+<script dangerouslySetInnerHTML={{
+  __html: `
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('global-follow-btn')
+      if(btn) {
+        btn.addEventListener('click', () => window.open('/feed', '_blank'))
+        btn.addEventListener('mouseenter', () => {
+          btn.style.transform = 'translateY(-3px)'
+          btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
+        })
+        btn.addEventListener('mouseleave', () => {
+          btn.style.transform = 'translateY(0)'
+          btn.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'
+        })
+      }
+    })
+  `
+}} />
+
       </body>
     </html>
   );
