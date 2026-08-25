@@ -128,16 +128,20 @@ export default async function RootLayout({
 
 <script dangerouslySetInnerHTML={{
   __html: `
-// 独立的铃铛订阅逻辑，完全不依赖其他代码
 document.addEventListener('DOMContentLoaded', function(){
-  const bellBtn = document.getElementById('global-follow-btn')
-  if(!bellBtn) return;
+  // 先把原来点不动的原生提示条直接隐藏掉
+  const oldTip = document.querySelector('div:has(> span:contains("关注此网站以后续收到更新推送通知"))')
+  if(oldTip) oldTip.style.display = 'none'
+
+  // 自己创建全新的可点击铃铛按钮
+  const bellBtn = document.createElement('div')
+  bellBtn.style.cssText = "position: fixed; bottom: 24px; right: 24px; z-index: 99999; padding: 12px 20px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; gap: 8px;"
+  bellBtn.innerHTML = "🔔"
+  document.body.appendChild(bellBtn)
   
-  // 直接创建弹窗面板
   const panel = document.createElement('div')
-  panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 10000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: none; flex-direction: column; gap: 16px; width: 280px;"
+  panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 100000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: none; flex-direction: column; gap: 16px; width: 280px;"
   
-  // 浏览器通知按钮
   const notifyBtn = document.createElement('button')
   notifyBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; border: none; cursor: pointer; font-size: 16px;"
   notifyBtn.innerText = '🔔 开启浏览器更新通知'
@@ -158,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
 
-  // 复制RSS链接按钮
   const copyBtn = document.createElement('button')
   copyBtn.innerText = '📋 复制RSS订阅链接'
   copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer; font-size: 16px;"
@@ -171,25 +174,24 @@ document.addEventListener('DOMContentLoaded', function(){
   panel.appendChild(copyBtn)
   document.body.appendChild(panel)
 
-  // 铃铛点击事件
+  let isPanelOpen = false
   bellBtn.addEventListener('click', function (e) {
     e.stopPropagation()
-    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+    isPanelOpen = !isPanelOpen
+    panel.style.display = isPanelOpen ? 'flex' : 'none'
+  })
+  bellBtn.addEventListener('touchstart', function (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    isPanelOpen = !isPanelOpen
+    panel.style.display = isPanelOpen ? 'flex' : 'none'
   })
 
- // 铃铛点击事件 同时兼容PC鼠标点击和手机触摸点击
-bellBtn.addEventListener('click', function (e) {
-  e.stopPropagation()
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
-})
-bellBtn.addEventListener('touchstart', function (e) {
-  e.preventDefault()
-  e.stopPropagation()
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
-})
+  document.addEventListener('click', function () {
+    isPanelOpen = false
+    panel.style.display = 'none'
+  })
 
-
-  // 阻止点击弹窗内部关闭
   panel.addEventListener('click', function (e) {
     e.stopPropagation()
   })
