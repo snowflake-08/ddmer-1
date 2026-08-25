@@ -1,11 +1,25 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+// 把导入路径从@/lib/prisma改成@/prisma，完美适配DDmer项目结构
+import prisma from '@/prisma'
+
+// XML特殊字符转义，避免RSS结构报错
+const escapeXml = (unsafe: string) => {
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;'
+      case '>': return '&gt;'
+      case '&': return '&amp;'
+      case "'": return '&apos;'
+      case '"': return '&quot;'
+      default: return c
+    }
+  })
+}
 
 export async function GET() {
   const posts = await prisma.post.findMany({
-    // 移除take数量限制，拉取所有已发布文章
     orderBy: { createdAt: 'desc' },
-    where: { status: 'published' } // 只取已发布的公开文章
+    where: { status: 'published' }
   })
 
   const rssContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -17,9 +31,9 @@ export async function GET() {
     <atom:link href="https://snowflake-06.cn/feed" rel="self" type="application/rss+xml"/>
     ${posts.map(post => `
       <item>
-        <title>${post.title}</title>
+        <title>${escapeXml(post.title)}</title>
         <link>https://snowflake-06.cn/post/${post.id}</link>
-        <description>${post.excerpt || post.content.slice(0, 200)}</description>
+        <description>${escapeXml(post.excerpt || post.content.slice(0, 200))}</description>
         <pubDate>${new Date(post.createdAt).toUTCString()}</pubDate>
       </item>
     `).join('')}
