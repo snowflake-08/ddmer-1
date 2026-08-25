@@ -107,6 +107,41 @@ export default async function RootLayout({
           </ThemeProvider>
         </SiteConfigProvider>
         <a href="https://icp.gov.moe/?keyword=20260356" target="_blank">萌ICP备20260356号</a>
+        <a href="https://icp.gov.moe/?keyword=20260356" target="_blank">萌ICP备20260356号</a>
+
+{/* 全局全页面悬浮关注入口 */}
+<div style={{
+  position: 'fixed',
+  bottom: '24px',
+  right: '24px',
+  zIndex: 9999,
+  background: 'rgba(255,255,255,0.75)',
+  backdropFilter: 'blur(14px)',
+  borderRadius: '20px',
+  padding: '14px 20px',
+  cursor: 'pointer',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+  transition: 'all 0.3s ease'
+}}
+onClick={() => {
+  window.open('/feed', '_blank')
+}}
+onMouseEnter={(e) => {
+  e.currentTarget.style.transform = 'translateY(-3px)'
+  e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
+}}
+onMouseLeave={(e) => {
+  e.currentTarget.style.transform = 'translateY(0)'
+  e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'
+}}>
+  <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+    <span style={{fontSize: '22px'}}>🔔</span>
+    <span style={{fontSize: '14px', color: '#2c3e50', fontWeight: 500}}>关注此网站以后续收到更新推送通知</span>
+  </div>
+</div>
+
+</body>
+
       </body>
     </html>
   );
