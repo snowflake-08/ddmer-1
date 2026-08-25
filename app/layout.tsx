@@ -127,67 +127,65 @@ export default async function RootLayout({
 </div>
 <script dangerouslySetInnerHTML={{
   __html: `
-    function initFollowBtn() {
-      const btn = document.getElementById('global-follow-btn')
-      if(btn) {
-        // 点击铃铛切换订阅弹窗显示/隐藏
-let panel = document.getElementById('subscribe-panel')
-if(!panel) {
-  // 动态创建两个彩色按钮的订阅弹窗
-  panel = document.createElement('div')
-  panel.id = 'subscribe-panel'
-  panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 10000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; width: 280px;"
-  // QQ邮箱订阅按钮
-  const qqBtn = document.createElement('a')
-  qqBtn.href = `https://mail.qq.com/cgi-bin/rss_add?url=${encodeURIComponent("https://snowflake-06.cn/feed")}&title=${encodeURIComponent("第三片雪花の小站")}`
-  qqBtn.target = '_blank'
-  qqBtn.innerText = '📧 QQ邮箱 直接订阅'
-  qqBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; text-decoration: none;"
-  
-  // 复制RSS链接按钮
-  const copyBtn = document.createElement('button')
-  copyBtn.innerText = '📋 复制RSS订阅链接'
-  copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer;"
-  
-  copyBtn.onclick = () => {
-    navigator.clipboard.writeText("https://snowflake-06.cn/feed")
-    alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
-  }
-  // 把两个按钮加到弹窗里，再把弹窗加到页面
-  panel.appendChild(qqBtn)
-  panel.appendChild(copyBtn)
-  document.body.appendChild(panel)
-  panel.style.display = 'none'
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
-
-}
-// 切换弹窗显示隐藏
-panel.style.display = panel.style.display === 'none' ? 'flex' : 'flex'
-// 点页面其他地方自动关闭弹窗
-document.addEventListener('click', (e) => {
-  if(!btn.contains(e.target) && !panel.contains(e.target)) {
-    panel.style.display = 'none'
-  }
-})
-
-
-        btn.addEventListener('mouseenter', () => {
-          btn.style.transform = 'translateY(-3px)'
-          btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
-        })
-        btn.addEventListener('mouseleave', () => {
-          btn.style.transform = 'translateY(0)'
-          btn.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'
-        })
+function initFollowBtn() {
+  const btn = document.getElementById('global-follow-btn')
+  if(btn) {
+    let panel = document.getElementById('subscribe-panel')
+    if(!panel) {
+      panel = document.createElement('div')
+      panel.id = 'subscribe-panel'
+      panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 10000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; width: 280px;"
+      
+      const qqBtn = document.createElement('a')
+      qqBtn.href = 'https://mail.qq.com/cgi-bin/rss_add?url=https%3A%2F%2Fsnowflake-06.cn%2Ffeed&title=%E7%AC%AC%E4%B8%89%E7%89%87%E9%9B%AA%E8%8A%B1%E3%81%AE%E5%B0%8F%E7%AB%99'
+      qqBtn.target = '_blank'
+      qqBtn.innerText = '📧 QQ邮箱 直接订阅'
+      qqBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; text-decoration: none;"
+      
+      const copyBtn = document.createElement('button')
+      copyBtn.innerText = '📋 复制RSS订阅链接'
+      copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer;"
+      copyBtn.onclick = function() {
+        navigator.clipboard.writeText("https://snowflake-06.cn/feed")
+        alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
       }
+
+      panel.appendChild(qqBtn)
+      panel.appendChild(copyBtn)
+      document.body.appendChild(panel)
+      panel.style.display = 'none'
     }
-    if(document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initFollowBtn)
-    } else {
-      initFollowBtn()
-    }
-  `
+
+    btn.addEventListener('click', function() {
+      panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+    })
+
+    btn.addEventListener('mouseenter', function() {
+      btn.style.transform = 'translateY(-3px)'
+      btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
+    })
+
+    btn.addEventListener('mouseleave', function() {
+      btn.style.transform = 'translateY(0)'
+      btn.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'
+    })
+
+    document.addEventListener('click', function(e) {
+      if(!btn.contains(e.target) && !panel.contains(e.target)) {
+        panel.style.display = 'none'
+      }
+    })
+  }
+}
+
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFollowBtn)
+} else {
+  initFollowBtn()
+}
+`
 }} />
+
 
 
       </body>
