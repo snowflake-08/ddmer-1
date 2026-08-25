@@ -130,7 +130,69 @@ export default async function RootLayout({
     function initFollowBtn() {
       const btn = document.getElementById('global-follow-btn')
       if(btn) {
-        btn.addEventListener('click', () => window.open('/subscribe', '_blank'))
+        // 点击铃铛切换订阅弹窗显示/隐藏
+let panel = document.getElementById('subscribe-panel')
+if(!panel) {
+  // 动态创建两个彩色按钮的订阅弹窗
+  panel = document.createElement('div')
+  panel.id = 'subscribe-panel'
+  panel.style.cssText = `
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    z-index: 10000;
+    padding: 24px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 280px;
+  `
+  // QQ邮箱订阅按钮
+  const qqBtn = document.createElement('a')
+  qqBtn.href = `https://mail.qq.com/cgi-bin/rss_add?url=${encodeURIComponent("https://snowflake-06.cn/feed")}&title=${encodeURIComponent("第三片雪花の小站")}`
+  qqBtn.target = '_blank'
+  qqBtn.innerText = '📧 QQ邮箱 直接订阅'
+  qqBtn.style.cssText = `
+    padding: 14px;
+    background: #12B7F5;
+    color: white;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+  `
+  // 复制RSS链接按钮
+  const copyBtn = document.createElement('button')
+  copyBtn.innerText = '📋 复制RSS订阅链接'
+  copyBtn.style.cssText = `
+    padding: 14px;
+    background: #6366F1;
+    color: white;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+  `
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText("https://snowflake-06.cn/feed")
+    alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
+  }
+  // 把两个按钮加到弹窗里，再把弹窗加到页面
+  panel.appendChild(qqBtn)
+  panel.appendChild(copyBtn)
+  document.body.appendChild(panel)
+}
+// 切换弹窗显示隐藏
+panel.style.display = panel.style.display === 'none' ? 'flex' : 'flex'
+// 点页面其他地方自动关闭弹窗
+document.addEventListener('click', (e) => {
+  if(!btn.contains(e.target) && !panel.contains(e.target)) {
+    panel.style.display = 'none'
+  }
+})
+
+
         btn.addEventListener('mouseenter', () => {
           btn.style.transform = 'translateY(-3px)'
           btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
