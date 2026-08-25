@@ -177,10 +177,17 @@ document.addEventListener('DOMContentLoaded', function(){
     panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
   })
 
-  // 点击页面其他地方自动关闭弹窗
-  document.addEventListener('click', function () {
-    panel.style.display = 'none'
-  })
+ // 铃铛点击事件 同时兼容PC鼠标点击和手机触摸点击
+bellBtn.addEventListener('click', function (e) {
+  e.stopPropagation()
+  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+})
+bellBtn.addEventListener('touchstart', function (e) {
+  e.preventDefault()
+  e.stopPropagation()
+  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+})
+
 
   // 阻止点击弹窗内部关闭
   panel.addEventListener('click', function (e) {
