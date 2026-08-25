@@ -125,7 +125,7 @@ export default async function RootLayout({
     <span style={{fontSize: '14px', color: '#2c3e50', fontWeight: 500}}>关注此网站以后续收到更新推送通知</span>
   </div>
 </div>
-<script dangerouslySetInnerHTML={{
+
  
 
 
