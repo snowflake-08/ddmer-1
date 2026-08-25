@@ -181,53 +181,64 @@ export default async function RootLayout({
 
 <script dangerouslySetInnerHTML={{
   __html: `
-document.addEventListener('DOMContentLoaded', function(){
-  const bellBtn = document.getElementById('global-follow-btn')
-  const panel = document.getElementById('bell-subscribe-panel')
-  const notifyBtn = document.getElementById('notify-btn')
-  const copyBtn = document.getElementById('rss-copy-btn')
-
-  let isPanelOpen = false
-  bellBtn.addEventListener('click', function (e) {
-    e.stopPropagation()
-    isPanelOpen = !isPanelOpen
-    panel.style.display = isPanelOpen ? 'flex' : 'none'
+(function initBell() {
+  // 先把页面上所有右下角的铃铛元素全部删掉，避免冲突
+  document.querySelectorAll('div[style*="position: fixed"]').forEach(el => {
+    if(el.innerHTML.includes('🔔') || el.innerHTML.includes('铃铛')) el.remove()
   })
 
-  notifyBtn.addEventListener('click', async function(){
+  // 直接生成绝对不会被遮挡的铃铛
+  const bellBtn = document.createElement('div')
+  bellBtn.style.cssText = "position: fixed; bottom: 24px; right: 24px; z-index: 9999999; width: 60px; height: 60px; background: white; border-radius: 50%; box-shadow: 0 4px 20px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 28px;"
+  bellBtn.innerText = "🔔"
+  document.body.appendChild(bellBtn)
+
+  // 生成订阅面板
+  const panel = document.createElement('div')
+  panel.style.cssText = "position: fixed; bottom: 100px; right: 24px; z-index: 9999999; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); display: none; flex-direction: column; gap: 16px; width: 280px;"
+  
+  const notifyBtn = document.createElement('button')
+  notifyBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; border: none; cursor: pointer; font-size: 16px;"
+  notifyBtn.innerText = '开启浏览器更新通知'
+  notifyBtn.onclick = async function(e){
+    e.stopPropagation()
     if (!('Notification' in window)) {
-      alert('你的浏览器不支持原生通知功能，可以换用Chrome/Edge等主流浏览器打开')
+      alert('你的浏览器不支持原生通知功能')
       return
     }
     const permission = await Notification.requestPermission()
     if (permission === 'granted') {
-      new Notification('订阅成功🎉', {
-时间收到浏览器推送通知，不用手动刷新网站        body: '之后博客更新你会第一',
-        icon: 'https://snowflake-06.cn/favicon.ico'
-      })
-      alert('✅ 浏览器更新通知已成功开启！之后有新文章会直接推送到你的桌面')
-    } else {
-      alert('你拒绝了通知权限，可以在浏览器设置里手动开启本站通知权限')
+      new Notification('订阅成功', {body: '之后博客更新会第一时间推送给你'})
+      alert('订阅成功')
     }
-  })
+  }
 
-  copyBtn.addEventListener('click', function() {
+  const copyBtn = document.createElement('button')
+  copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer; font-size: 16px;"
+  copyBtn.innerText = '复制RSS订阅链接'
+  copyBtn.onclick = function(e) {
+    e.stopPropagation()
     navigator.clipboard.writeText("https://snowflake-06.cn/feed")
-    alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
-  })
+    alert("链接已复制")
+  }
 
-  document.addEventListener('click', function () {
-    isPanelOpen = false
+  panel.appendChild(notifyBtn)
+  panel.appendChild(copyBtn)
+  document.body.appendChild(panel)
+
+  // 直接绑定点击事件，没有任何延迟
+  bellBtn.onclick = function(e) {
+    e.stopPropagation()
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+  }
+
+  document.addEventListener('click', function() {
     panel.style.display = 'none'
   })
-
-  panel.addEventListener('click', function (e) {
-    e.stopPropagation()
-  })
-})
+  panel.onclick = function(e) {e.stopPropagation()}
+})()
 `
 }} />
-
 
       </body>
     </html>
