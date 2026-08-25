@@ -126,10 +126,8 @@ export default async function RootLayout({
   </div>
 </div>
 
- 
-
-
-<script>
+<script dangerouslySetInnerHTML={{
+  __html: `
 // 独立的铃铛订阅逻辑，完全不依赖其他代码
 document.addEventListener('DOMContentLoaded', function(){
   const bellBtn = document.getElementById('global-follow-btn')
@@ -189,7 +187,9 @@ document.addEventListener('DOMContentLoaded', function(){
     e.stopPropagation()
   })
 })
-</script>
+`
+}} />
+
 
       </body>
     </html>
