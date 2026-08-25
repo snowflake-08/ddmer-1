@@ -15,26 +15,26 @@ export default function SubscribePage() {
       backdropFilter: "blur(14px)"
     }}>
       <div style={{
-        maxWidth: "600px",
+        maxWidth: "500px",
         width: "100%",
         background: "white",
         borderRadius: "24px",
         padding: "40px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.08)"
       }}>
-        <h1 style={{fontSize: "28px", marginBottom: "12px", textAlign: "center"}}>🔔 一键订阅本站更新</h1>
+        <h1 style={{fontSize: "28px", marginBottom: "12px", textAlign: "center"}}>🔔 订阅本站更新</h1>
         <p style={{fontSize: "16px", color: "#666", marginBottom: "32px", textAlign: "center"}}>
-          点一下对应按钮，就能自动在你常用的工具里完成订阅
+          点一下对应按钮，就能快速完成订阅
         </p>
 
         <div style={{display: "grid", gap: "16px", marginBottom: "32px"}}>
           <a 
-            href={`https://sspai.com/feed/add?feed=${rssUrl}`}
+            href={`https://mail.qq.com/cgi-bin/feed?url=${rssUrl}&title=${siteTitle}`}
             target="_blank"
             style={{
               display: "block",
               padding: "16px",
-              background: "#2563eb",
+              background: "#12B7F5",
               color: "white",
               borderRadius: "12px",
               textAlign: "center",
@@ -43,61 +43,7 @@ export default function SubscribePage() {
               fontWeight: 500
             }}
           >
-            📱 用 少数派 直接订阅
-          </a>
-
-          <a 
-            href={`https://www.inoreader.com/?add_feed=${rssUrl}`}
-            target="_blank"
-            style={{
-              display: "block",
-              padding: "16px",
-              background: "#f97316",
-              color: "white",
-              borderRadius: "12px",
-              textAlign: "center",
-              textDecoration: "none",
-              fontSize: "16px",
-              fontWeight: 500
-            }}
-          >
-            📚 用 Inoreader 直接订阅
-          </a>
-
-          <a 
-            href={`https://feedly.com/i/subscription/feed/${rssUrl}`}
-            target="_blank"
-            style={{
-              display: "block",
-              padding: "16px",
-              background: "#22c55e",
-              color: "white",
-              borderRadius: "12px",
-              textAlign: "center",
-              textDecoration: "none",
-              fontSize: "16px",
-              fontWeight: 500
-            }}
-          >
-            📰 用 Feedly 直接订阅
-          </a>
-
-          <a 
-            href={`https://weread.qq.com/web/search/subscribe?url=${rssUrl}&title=${siteTitle}`}
-            target="_blank"
-            style={{
-              display: "block",
-              padding: "16px",
-              background: "#07c160",
-              color: "white",
-              borderRadius: "12px",
-              textAlign: "center",
-              textDecoration: "none",
-              fontSize: "16px",
-              fontWeight: 500
-            }}
-          >
-            📖 用 微信读书 直接订阅
+            📧 用 QQ邮箱 直接订阅
           </a>
 
           <button 
