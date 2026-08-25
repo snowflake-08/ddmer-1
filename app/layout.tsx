@@ -120,17 +120,14 @@ export default async function RootLayout({
     padding: '14px 20px',
     cursor: 'pointer',
     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-    transition: 'all 0.3s ease'
-  }}
-  onClick={() => {
-    const panel = document.getElementById('bell-subscribe-panel')
-    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none'
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
   }}
 >
-  <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-    <span style={{fontSize: '22px'}}>🔔</span>
-    <span style={{fontSize: '14px', color: '#2c3e50', fontWeight: 500}}></span>
-  </div>
+  <span style={{fontSize: '22px'}}>🔔</span>
+  <span style={{fontSize: '14px', color: '#2c3e50', fontWeight: 500}}></span>
 </div>
 
 <div 
@@ -149,9 +146,9 @@ export default async function RootLayout({
     gap: '16px',
     width: '280px'
   }}
-  onClick={(e) => e.stopPropagation()}
 >
   <button
+    id="notify-btn"
     style={{
       padding: '14px',
       background: '#12B7F5',
@@ -162,27 +159,12 @@ export default async function RootLayout({
       cursor: 'pointer',
       fontSize: '16px'
     }}
-    onClick={async () => {
-      if (!('Notification' in window)) {
-        alert('你的浏览器不支持原生通知功能，可以换用Chrome/Edge等主流浏览器打开')
-        return
-      }
-      const permission = await Notification.requestPermission()
-      if (permission === 'granted') {
-        new Notification('订阅成功🎉', {
-          body: '之后博客更新你会第一时间收到浏览器推送通知，不用手动刷新网站',
-          icon: 'https://snowflake-06.cn/favicon.ico'
-        })
-        alert('✅ 浏览器更新通知已成功开启！之后有新文章会直接推送到你的桌面')
-      } else {
-        alert('你拒绝了通知权限，可以在浏览器设置里手动开启本站通知权限')
-      }
-    }}
   >
     🔔 开启浏览器更新通知
   </button>
 
   <button
+    id="rss-copy-btn"
     style={{
       padding: '14px',
       background: '#6366F1',
@@ -192,14 +174,59 @@ export default async function RootLayout({
       cursor: 'pointer',
       fontSize: '16px'
     }}
-    onClick={() => {
-      navigator.clipboard.writeText("https://snowflake-06.cn/feed")
-      alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
-    }}
   >
     📋 复制RSS订阅链接
   </button>
 </div>
+
+<script dangerouslySetInnerHTML={{
+  __html: `
+document.addEventListener('DOMContentLoaded', function(){
+  const bellBtn = document.getElementById('global-follow-btn')
+  const panel = document.getElementById('bell-subscribe-panel')
+  const notifyBtn = document.getElementById('notify-btn')
+  const copyBtn = document.getElementById('rss-copy-btn')
+
+  let isPanelOpen = false
+  bellBtn.addEventListener('click', function (e) {
+    e.stopPropagation()
+    isPanelOpen = !isPanelOpen
+    panel.style.display = isPanelOpen ? 'flex' : 'none'
+  })
+
+  notifyBtn.addEventListener('click', async function(){
+    if (!('Notification' in window)) {
+      alert('你的浏览器不支持原生通知功能，可以换用Chrome/Edge等主流浏览器打开')
+      return
+    }
+    const permission = await Notification.requestPermission()
+    if (permission === 'granted') {
+      new Notification('订阅成功🎉', {
+时间收到浏览器推送通知，不用手动刷新网站        body: '之后博客更新你会第一',
+        icon: 'https://snowflake-06.cn/favicon.ico'
+      })
+      alert('✅ 浏览器更新通知已成功开启！之后有新文章会直接推送到你的桌面')
+    } else {
+      alert('你拒绝了通知权限，可以在浏览器设置里手动开启本站通知权限')
+    }
+  })
+
+  copyBtn.addEventListener('click', function() {
+    navigator.clipboard.writeText("https://snowflake-06.cn/feed")
+    alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
+  })
+
+  document.addEventListener('click', function () {
+    isPanelOpen = false
+    panel.style.display = 'none'
+  })
+
+  panel.addEventListener('click', function (e) {
+    e.stopPropagation()
+  })
+})
+`
+}} />
 
 
       </body>
