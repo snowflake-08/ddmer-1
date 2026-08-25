@@ -127,10 +127,10 @@ export default async function RootLayout({
 </div>
 <script dangerouslySetInnerHTML={{
   __html: `
-    document.addEventListener('DOMContentLoaded', () => {
+    function initFollowBtn() {
       const btn = document.getElementById('global-follow-btn')
       if(btn) {
-        btn.addEventListener('click', () => window.open('/feed', '_blank'))
+        btn.addEventListener('click', () => window.open('/subscribe', '_blank'))
         btn.addEventListener('mouseenter', () => {
           btn.style.transform = 'translateY(-3px)'
           btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.12)'
@@ -140,9 +140,15 @@ export default async function RootLayout({
           btn.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'
         })
       }
-    })
+    }
+    if(document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFollowBtn)
+    } else {
+      initFollowBtn()
+    }
   `
 }} />
+
 
       </body>
     </html>
