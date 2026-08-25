@@ -2,6 +2,7 @@
 export default function SubscribePage() {
   const rssUrl = encodeURIComponent("https://snowflake-06.cn/feed")
   const siteTitle = encodeURIComponent("第三片雪花の小站")
+  const qqSubscribeUrl = `https://mail.qq.com/cgi-bin/rss_add?url=${rssUrl}&title=${siteTitle}`
 
   return (
     <div style={{
@@ -25,11 +26,13 @@ export default function SubscribePage() {
         <h1 style={{fontSize: "28px", marginBottom: "12px", textAlign: "center"}}>🔔 订阅本站更新</h1>
         <p style={{fontSize: "16px", color: "#666", marginBottom: "32px", textAlign: "center"}}>
           点一下对应按钮，就能快速完成订阅
-        </p>
+        </p><p style={{fontSize: "14px", color: "#888", textAlign: "center", marginBottom: "24px"}}>
+登录QQ邮箱后直接进入订阅确认页，点一下就能完成，后续更新自动发邮件提醒
+</p>
 
         <div style={{display: "grid", gap: "16px", marginBottom: "32px"}}>
           <a 
-            href={`https://mail.qq.com/cgi-bin/feed?url=${rssUrl}&title=${siteTitle}`}
+            
             target="_blank"
             style={{
               display: "block",
