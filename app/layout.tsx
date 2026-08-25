@@ -137,20 +137,18 @@ if(!panel) {
   panel = document.createElement('div')
   panel.id = 'subscribe-panel'
   panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 10000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; width: 280px;"
-
-  `
   // QQ邮箱订阅按钮
   const qqBtn = document.createElement('a')
   qqBtn.href = `https://mail.qq.com/cgi-bin/rss_add?url=${encodeURIComponent("https://snowflake-06.cn/feed")}&title=${encodeURIComponent("第三片雪花の小站")}`
   qqBtn.target = '_blank'
   qqBtn.innerText = '📧 QQ邮箱 直接订阅'
   qqBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; text-decoration: none;"
-  `
+  
   // 复制RSS链接按钮
   const copyBtn = document.createElement('button')
   copyBtn.innerText = '📋 复制RSS订阅链接'
   copyBtn.style.cssText = "padding: 14px; background: #6366F1; color: white; border-radius: 12px; border: none; cursor: pointer;"
-  `
+  
   copyBtn.onclick = () => {
     navigator.clipboard.writeText("https://snowflake-06.cn/feed")
     alert("订阅链接已经复制到剪贴板，你可以粘贴到任意RSS阅读器里完成订阅")
