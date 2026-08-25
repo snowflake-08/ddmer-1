@@ -30,13 +30,7 @@ export default function WelcomeScreen() {
   const CORRECT_PWD = "0615";
   const PHONE_NUM = "15636176689";
   const EMAIL_ADDR = "180877972@qq.com";
-// 自动检查24小时免登录有效期
-useEffect(() => {
-  const authExpire = localStorage.getItem('site_auth_expire')
-  if (authExpire && Date.now() < parseInt(authExpire)) {
-    setShow(false)
-  }
-}, [])
+
 
   // 完全删掉localStorage记住密码的逻辑，每次打开页面都强制显示密码页
   const handlePwdVerify = () => {
