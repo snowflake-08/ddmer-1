@@ -137,7 +137,7 @@ function initFollowBtn() {
       panel.style.cssText = "position: fixed; bottom: 90px; right: 24px; z-index: 10000; padding: 24px; background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 16px; width: 280px;"
       
       const qqBtn = document.createElement('a')
-      qqBtn.href = 'https://mail.qq.com/cgi-bin/rss_add?url=https%3A%2F%2Fsnowflake-06.cn%2Ffeed&title=%E7%AC%AC%E4%B8%89%E7%89%87%E9%9B%AA%E8%8A%B1%E3%81%AE%E5%B0%8F%E7%AB%99'
+      qqBtn.href = 'https://i.mail.qq.com/cgi-bin/frame_html?sid=,7&t=newwidget/rss_add&url=https%3A%2F%2Fsnowflake-06.cn%2Ffeed&title=%E7%AC%AC%E4%B8%89%E7%89%87%E9%9B%AA%E8%8A%B1%E3%81%AE%E5%B0%8F%E7%AB%99'
       qqBtn.target = '_blank'
       qqBtn.innerText = '📧 QQ邮箱 直接订阅'
       qqBtn.style.cssText = "padding: 14px; background: #12B7F5; color: white; border-radius: 12px; text-align: center; text-decoration: none;"
