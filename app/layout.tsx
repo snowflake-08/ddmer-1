@@ -106,7 +106,16 @@ export default async function RootLayout({
             </EffectProvider>
           </ThemeProvider>
         </SiteConfigProvider>
-        <a href="https://icp.gov.moe/?keyword=20260356" target="_blank">萌ICP备20260356号</a>
+        <a 
+          href="https://icp.gov.moe/?keyword=20260356" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-gray-300 border border-white/10 hover:-translate-y-0.5 hover:bg-pink-400/15 hover:text-pink-400 dark:bg-white/5 dark:text-gray-300 dark:border-white/10 dark:hover:bg-pink-400/15 dark:hover:text-pink-400"
+
+>
+  萌ICP备20260356号
+</a>
+
       </body>
     </html>
   );
