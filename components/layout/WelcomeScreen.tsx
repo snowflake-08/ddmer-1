@@ -195,7 +195,7 @@ export default function WelcomeScreen() {
             >
               <p className="text-sm text-slate-400 mb-4 whitespace-pre-line">
                 看看你还记不记得我的生日 😊：月+日
-                （只是用于限流，已经添加我的可以去我的朋友圈置顶查看哦 📍）</p>
+                （仅用于限流，已经添加我的可以去我的wx朋友圈置顶查看哦 📍）</p>
 
               <input
                 type="password"
