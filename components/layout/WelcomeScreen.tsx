@@ -225,18 +225,9 @@ export default function WelcomeScreen() {
                 exit={{ opacity: 0 }}
                 transition={{ delay: 2.9, duration: 0.5 }}
               >
-                <p className="text-xs text-slate-400 mb-3">如果您还未添加我，可以点击下方手机或邮箱留言哦！</p>
+                <p className="text-xs text-slate-400 mb-3">如果您还未添加我，可以点击下方邮箱留言哦！</p>
                 <div className="flex items-center justify-center space-x-6">
-                  {/* 电话图标 */}
-                  <button
-                    onClick={handlePhoneClick}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
-                    title="点击选择复制或拨打"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-sky-400">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                  </button>
+                 
                   {/* 邮箱图标 */}
                   <a
                     href={`mailto:${EMAIL_ADDR}`}
@@ -312,56 +303,7 @@ export default function WelcomeScreen() {
             </motion.div>
           </div>
 
-          {/* 电话操作双选项弹窗 */}
-          <AnimatePresence>
-            {showPhoneActionModal && (
-              <>
-                <motion.div
-                  className="absolute inset-0 bg-black/60 z-[100000]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setShowPhoneActionModal(false)}
-                />
-                <motion.div
-                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] w-72 bg-slate-900 border border-white/10 rounded-2xl p-6 text-center"
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                  transition={{ 
-                    type: "spring", 
-                    stiffness: 300, 
-                    damping: 20,
-                    duration: 0.4 
-                  }}
-                >
-                  <p className="text-white text-base mb-1">手机号</p>
-                  <p className="text-sky-400 text-lg font-medium mb-6">{PHONE_NUM}</p>
-                  <div className="flex flex-col space-y-3">
-                    <button
-                      onClick={handleCopyPhone}
-                      className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl transition-colors duration-200"
-                    >
-                      复制
-                    </button>
-                    <button
-                      onClick={handleCallPhone}
-                      className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors duration-200"
-                    >
-                      拨打
-                    </button>
-                    <button
-                      onClick={() => setShowPhoneActionModal(false)}
-                      className="w-full py-2 text-slate-400 text-sm mt-1"
-                    >
-                      取消
-                    </button>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-
+          
           {/* 邮件确认弹窗 */}
           <AnimatePresence>
             {showEmailConfirmModal && (
