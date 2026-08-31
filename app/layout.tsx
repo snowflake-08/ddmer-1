@@ -115,6 +115,16 @@ export default async function RootLayout({
   >
     萌ICP备20260356号
   </a>
+  <span className="mx-2">|</span>
+  <a
+  href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=2026010415"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-gray-500 dark:text-gray-400"
+>
+  黑ICP备2026010415号-1
+</a>
+
 </div>
 
       </body>
