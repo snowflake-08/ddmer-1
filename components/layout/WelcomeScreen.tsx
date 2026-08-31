@@ -194,7 +194,7 @@ export default function WelcomeScreen() {
               transition={{ delay: 2.6, duration: 0.6 }}
             >
               <p className="text-sm text-slate-400 mb-4 text-center leading-relaxed">
-                看看你还记不记得我的生日 😊：月+日
+                看看你还记不记得我的生日 😊：月+日（按下"↩"即可引入）
               <br />
                 （仅用于限流，已经添加我的可以去我的wx朋友圈置顶查看哦🌹）
               </p>
