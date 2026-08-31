@@ -108,7 +108,7 @@ export default async function RootLayout({
         </SiteConfigProvider>
         <div className="w-full text-center">
   <a
-  href="https://beian.miit.gov.cn/"
+  href="https://icp.gov.moe/?keyword=20260356"
   target="_blank"
   rel="noopener noreferrer"
   className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
