@@ -127,7 +127,7 @@ export default async function RootLayout({
   </a>
   <span className="mx-2 text-black dark:text-white">|</span>
   <a
-    href="https://beian.mps.gov.cn/#/query/webSearch?code=23010302001993"
+    href="https://beian.mps.gov.cn/#/query/webSearch?code=23010302001993" rel="noreferrer" 
     target="_blank"
     rel="noopener noreferrer"
     className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
