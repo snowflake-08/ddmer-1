@@ -141,9 +141,6 @@ export default async function RootLayout({
 
 </div>
 
-
-</div>
-
       </body>
     </html>
   );
