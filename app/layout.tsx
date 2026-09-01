@@ -124,19 +124,21 @@ export default async function RootLayout({
     className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
   >
     黑ICP备2026010415号-1
+<div className="text-center py-4 text-sm text-gray-500">
   <a
-  href="https://beian.mps.gov.cn/#/query/webSearch?code=23010302001993"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300"
->
-  <img
-    src="/gongan-beian-icon.png"
-    alt="公安备案图标"
-    className="h-4 w-auto object-contain"
-  />
-  黑公网安备23010302001993号
-</a>
+    href="https://beian.mps.gov.cn/#/query/webSearch?code=23010302001993"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1.5"
+  >
+    <img
+      src="/gongan-beian-icon.png"
+      alt="公安备案图标"
+      className="h-4 w-auto"
+    />
+    黑公网安备23010302001993号
+  </a>
+</div>
 
 </div>
 
