@@ -107,23 +107,35 @@ export default async function RootLayout({
           </ThemeProvider>
         </SiteConfigProvider>
         <div className="w-full text-center">
+ <div className="w-full text-center">
   <a
-  href="https://icp.gov.moe/?keyword=20260356"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
->
-  萌ICP备20260356号
-</a>
-<span className="mx-2 text-black dark:text-white">|</span>
-<a
-  href="https://beian.miit.gov.cn/"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
->
-  黑ICP备2026010415号-1
-</a>
+    href="https://icp.gov.moe/?keyword=20260356"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
+  >
+    萌ICP备20260356号
+  </a>
+  <span className="mx-2 text-black dark:text-white">|</span>
+  <a
+    href="https://beian.miit.gov.cn/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
+  >
+    黑ICP备2026010415号-1
+  </a>
+  <span className="mx-2 text-black dark:text-white">|</span>
+  <a
+    href="https://beian.mps.gov.cn/#/query/webSearch?code=23010302001993"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md bg-white/5 text-black dark:text-white"
+  >
+    黑公网安备23010302001993号
+  </a>
+</div>
+
 
 </div>
 
