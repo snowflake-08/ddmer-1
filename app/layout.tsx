@@ -112,7 +112,7 @@ export default async function RootLayout({
       href="https://icp.gov.moe/?keyword=20260356"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md"
+      className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 text-black dark:text-white"
     >
       萌ICP备20260356号
     </a>
@@ -121,17 +121,17 @@ export default async function RootLayout({
       href="https://beian.miit.gov.cn/"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 backdrop-blur-md"
+      className="inline-block px-3 py-1 rounded-lg text-xs no-underline transition-all duration-300 text-black dark:text-white"
     >
       黑ICP备2026010415号-1
     </a>
   </div>
-  <div className="text-center py-4 text-sm text-gray-500">
+  <div className="text-center py-4 text-sm">
     <a
       href="https://beian.mps.gov.cn/#/query/webSearch?code=23010302001993"
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5"
+      className="inline-flex items-center gap-1.5 text-black dark:text-white no-underline"
     >
       <img
         src="/gongan-beian-icon.png"
@@ -142,6 +142,7 @@ export default async function RootLayout({
     </a>
   </div>
 </div>
+
       </body>
     </html>
   );
