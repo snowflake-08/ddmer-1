@@ -427,3 +427,15 @@ model EmailVerification {
   @@index([code])
   @@map("email_verification")
 }
+
+model PushSubscription {
+  id         Int      @id @default(autoincrement())
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  user_agent String   @default("")
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map("push_subscription")
+}

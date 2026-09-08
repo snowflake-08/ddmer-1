@@ -399,6 +399,17 @@ CREATE INDEX IF NOT EXISTS "book_note_book_id_idx" ON "book_note"("book_id");
 CREATE INDEX IF NOT EXISTS "email_verification_email_idx" ON "email_verification"("email");
 CREATE INDEX IF NOT EXISTS "email_verification_code_idx" ON "email_verification"("code");
 
+-- 浏览器订阅（Web Push）订阅记录
+CREATE TABLE IF NOT EXISTS "push_subscription" (
+    "id" SERIAL PRIMARY KEY,
+    "endpoint" TEXT NOT NULL UNIQUE,
+    "p256dh" TEXT NOT NULL,
+    "auth" TEXT NOT NULL,
+    "user_agent" TEXT NOT NULL DEFAULT '',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- SeedData: 默认管理员账户（用户名: admin，密码: admin123）
 -- 首次登录后请立即在后台修改密码！
 -- 已存在则跳过，可安全重复执行

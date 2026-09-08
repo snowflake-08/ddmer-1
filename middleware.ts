@@ -59,7 +59,10 @@ export function middleware(request: NextRequest) {
   }
 
   // ── 静态资源长缓存 ──
-  if (
+  // 注意：sw.js 必须实时更新，不能参与长缓存
+  if (url.pathname === "/sw.js") {
+    response.headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  } else if (
     url.pathname.startsWith("/admin/static") ||
     url.pathname.match(/\.(js|css|woff2?|ttf|svg|ico)$/)
   ) {

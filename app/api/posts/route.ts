@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
+import { notifyPostPublished } from "@/app/lib/push";
 
 function toPostItem(post: any) {
   return {
@@ -187,6 +188,21 @@ export async function POST(req: NextRequest) {
         where: { id: category_id },
         data: { post_count: { increment: 1 } },
       });
+    }
+
+    // 发布成功时自动提醒订阅用户
+    if (post.status === "published") {
+      const siteUrl = process.env.FRONTEND_ORIGIN || new URL(req.url).origin;
+      await notifyPostPublished(
+        {
+          title: post.title,
+          slug: post.slug,
+          description: post.description || null,
+        },
+        siteUrl
+      ).catch((err) =>
+        console.error("notify subscribers on new post failed:", err)
+      );
     }
 
     return NextResponse.json(toPostItem(post));

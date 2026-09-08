@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getCurrentUser } from "@/app/lib/auth";
+import { notifyPostPublished } from "@/app/lib/push";
 import { deleteFile, cleanUrlPath, extractR2Urls } from "@/app/lib/r2";
 
 function toPostItem(post: any) {
@@ -223,6 +224,21 @@ export async function PUT(
           data: { post_count: { increment: 1 } },
         });
       }
+    }
+
+    // 文章从草稿变为发布状态时，自动提醒订阅用户
+    if (status === "published" && existing.status !== "published") {
+      const siteUrl = process.env.FRONTEND_ORIGIN || new URL(req.url).origin;
+      await notifyPostPublished(
+        {
+          title: post.title,
+          slug: post.slug,
+          description: post.description || null,
+        },
+        siteUrl
+      ).catch((err) =>
+        console.error("notify subscribers on publish failed:", err)
+      );
     }
 
     return NextResponse.json(toPostItem(post));

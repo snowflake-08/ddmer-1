@@ -11,6 +11,7 @@ import { SiteConfigProvider } from "@/components/providers/SiteConfigProvider";
 import BackgroundRenderer from "@/components/layout/BackgroundRenderer";
 import Navbar from "@/components/layout/Navbar";
 import ClientWidgets from "@/components/layout/ClientWidgets";
+import SubscribeButton from "@/components/push/SubscribeButton";
 import ClickEffect from "@/components/ui/ClickEffect";
 import RadialMenu from "@/components/ui/RadialMenu";
 import MouseTrail from "@/components/ui/MouseTrail";
@@ -100,6 +101,7 @@ export default async function RootLayout({
                       {children}
                     </main>
                     <ClientWidgets />
+                    <SubscribeButton />
                   </ToastProvider>
                 </MusicProvider>
               </BackgroundProvider>

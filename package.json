@@ -8,6 +8,7 @@
     "build": "rm -rf public/admin && npm --prefix admin install --include=dev && npm --prefix admin run build && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "vapid:keys": "node scripts/generate-vapid-keys.mjs",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
@@ -71,6 +72,7 @@
     "sharp": "^0.35.0",
     "three": "^0.184.0",
     "unified": "^11.0.5",
+    "web-push": "^3.6.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -81,6 +83,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.184.1",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "prisma": "^6.19.3",

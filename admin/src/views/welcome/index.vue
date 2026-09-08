@@ -5,10 +5,17 @@ import { useDark, randomGradient } from "./utils";
 import WelcomeTable from "./components/table/index.vue";
 import { ReNormalCountTo } from "@/components/ReCountTo";
 import { useRenderFlicker } from "@/components/ReFlicker";
+import { message } from "@/utils/message";
 import { ChartBar, ChartLine, ChartRound } from "./components/charts";
 import Segmented, { type OptionsType } from "@/components/ReSegmented";
 import { chartData as staticChartData, barChartData as staticBarChartData, latestNewsData as staticLatestNewsData } from "./data";
-import { getWelcomeStats, type WelcomeChartItem, type WelcomeStats, type WelcomeLatestItem } from "@/api/dashboard";
+import {
+  getWelcomeStats,
+  sendUpdatePush,
+  type WelcomeChartItem,
+  type WelcomeStats,
+  type WelcomeLatestItem
+} from "@/api/dashboard";
 
 defineOptions({
   name: "Welcome"
@@ -50,6 +57,28 @@ const barChartData = ref<Array<{ requireData: number[]; questionData: number[] }
 const latestNewsData = ref<WelcomeLatestItem[]>([...staticLatestNewsData]);
 
 const loading = ref(false);
+const pushTitle = ref("");
+const pushBody = ref("");
+const pushSending = ref(false);
+
+/** 手动给所有订阅用户发送“网站更新”通知 */
+async function sendPush() {
+  if (pushSending.value) return;
+  pushSending.value = true;
+  try {
+    const res = await sendUpdatePush({
+      title: pushTitle.value,
+      body: pushBody.value
+    });
+    message(`已推送给 ${res?.total ?? 0} 位订阅用户`, { type: "success" });
+    pushTitle.value = "";
+    pushBody.value = "";
+  } catch (e: any) {
+    message(e?.message ?? "推送失败，请检查 VAPID 配置", { type: "error" });
+  } finally {
+    pushSending.value = false;
+  }
+}
 
 // 根据 name 合并 API 返回的 value/data
 function mergeByName(
@@ -95,6 +124,31 @@ onMounted(() => {
 
 <template>
   <div>
+    <el-card shadow="never" class="mb-4.5 push-card">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-md font-medium shrink-0">更新推送</span>
+        <el-input
+          v-model="pushTitle"
+          placeholder="通知标题（留空自动填充）"
+          clearable
+          style="width: 15rem"
+        />
+        <el-input
+          v-model="pushBody"
+          placeholder="要通知的内容，例如：发布了新的说说"
+          clearable
+          style="width: 22rem"
+          @keyup.enter="sendPush"
+        />
+        <el-button type="primary" :loading="pushSending" @click="sendPush">
+          发送给订阅用户
+        </el-button>
+      </div>
+      <p class="mt-2 text-sm text-text_color_regular">
+        发布新文章时会自动通知订阅用户；对说说、照片等其他更新，可在此手动推送一条通知。
+      </p>
+    </el-card>
+
     <el-row :gutter="24" justify="space-around">
       <re-col
         v-for="(item, index) in chartData"
@@ -297,6 +351,10 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+:deep(.push-card .el-card__body) {
+  padding: 16px 20px;
+}
+
 :deep(.el-card) {
   --el-card-border-color: none;
 

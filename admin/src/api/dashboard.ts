@@ -53,3 +53,15 @@ export const getDashboardStats = () => {
 export const getWelcomeStats = () => {
   return http.request<WelcomeStats>("get", "/api/dashboard/welcome");
 };
+
+export type PushBroadcastResult = {
+  total: number;
+  sent: number;
+  removed: number;
+  failed: number;
+};
+
+/** 手动向所有浏览器订阅用户推送一条更新通知 */
+export const sendUpdatePush = (data: { title?: string; body?: string }) => {
+  return http.request<PushBroadcastResult>("post", "/api/push/notify", { data });
+};
