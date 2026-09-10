@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { getVapidPublicKey, isPushConfigured } from "@/app/lib/push";
+import { getPushStatus } from "@/app/lib/push";
 
 export async function GET() {
-  if (!isPushConfigured) {
+  const status = getPushStatus();
+  if (!status.configured) {
     return NextResponse.json(
-      { error: "推送功能未启用（缺少 VAPID 配置）" },
+      { error: status.reason || "推送功能未启用" },
       { status: 503 }
     );
   }
-  return NextResponse.json({ publicKey: getVapidPublicKey() });
+  return NextResponse.json({ publicKey: status.publicKey });
 }

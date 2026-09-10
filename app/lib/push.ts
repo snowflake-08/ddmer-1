@@ -1,21 +1,137 @@
 import webpush from "web-push";
 import { prisma } from "@/app/lib/prisma";
 
-const VAPID_PUBLIC_KEY = (process.env.VAPID_PUBLIC_KEY || "").trim();
-const VAPID_PRIVATE_KEY = (process.env.VAPID_PRIVATE_KEY || "").trim();
-const VAPID_SUBJECT = (
-  process.env.VAPID_SUBJECT || "mailto:no-reply@example.com"
-).trim();
+/** VAPID 配置状态（用于后台展示 / 接口提示） */
+export interface PushConfigStatus {
+  /** 配置是否可用（可用才允许订阅与推送） */
+  configured: boolean;
+  /** 公钥，仅在可用时返回，供前端订阅使用 */
+  publicKey: string;
+  /** 不可用时的原因（可直接展示给用户），可用时为 null */
+  reason: string | null;
+}
 
-/** 是否已经配置了推送所需的 VAPID 密钥 */
-export const isPushConfigured = Boolean(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
+const RAW_PUBLIC_KEY = (process.env.VAPID_PUBLIC_KEY || "").trim();
+const RAW_PRIVATE_KEY = (process.env.VAPID_PRIVATE_KEY || "").trim();
+const RAW_SUBJECT = (process.env.VAPID_SUBJECT || "").trim();
+/** web-push 要求 subject 是 mailto: 或 https:// 地址，为空时兜底一个合法值 */
+const VAPID_SUBJECT = RAW_SUBJECT || "mailto:no-reply@example.com";
 
-if (isPushConfigured) {
-  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+/** 数据库缺少订阅表时给用户的提示 */
+export const PUSH_TABLE_MISSING_HINT =
+  "数据库缺少 push_subscription 表：请在服务器执行 `npx prisma db push`（或运行 init.sql 中的建表语句）后重试";
+
+/** 解析 base64 / base64url 字符串，失败返回 null */
+function decodeBase64(input: string): Buffer | null {
+  if (!input || !/^[A-Za-z0-9_\-+/]+={0,2}$/.test(input)) return null;
+  try {
+    const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(
+      Math.ceil(normalized.length / 4) * 4,
+      "="
+    );
+    const bytes = Buffer.from(padded, "base64");
+    return bytes.length > 0 ? bytes : null;
+  } catch {
+    return null;
+  }
+}
+
+function isValidSubject(subject: string): boolean {
+  if (/^mailto:.+@.+/i.test(subject)) return true;
+  try {
+    new URL(subject);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** 校验密钥/主题，返回原因；一切正常返回 null */
+function validateConfig(): string | null {
+  if (!RAW_PUBLIC_KEY && !RAW_PRIVATE_KEY) {
+    return "未配置 VAPID 密钥（VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY），浏览器订阅通知功能已关闭";
+  }
+  if (!RAW_PUBLIC_KEY) return "缺少 VAPID_PUBLIC_KEY";
+  if (!RAW_PRIVATE_KEY) return "缺少 VAPID_PRIVATE_KEY";
+
+  // 常见误操作：直接复制 .env.example，占位值没替换
+  if (/^your[_-]/i.test(RAW_PUBLIC_KEY) || /^your[_-]/i.test(RAW_PRIVATE_KEY)) {
+    return "VAPID 密钥还是 .env.example 里的示例占位值，请执行 `pnpm vapid:keys` 生成真实密钥后再填写";
+  }
+
+  const publicBytes = decodeBase64(RAW_PUBLIC_KEY);
+  if (!publicBytes || publicBytes.length !== 65) {
+    return "VAPID_PUBLIC_KEY 格式不正确（应为 65 字节的 base64url 字符串），请用 `pnpm vapid:keys` 重新生成";
+  }
+  const privateBytes = decodeBase64(RAW_PRIVATE_KEY);
+  if (!privateBytes || privateBytes.length !== 32) {
+    return "VAPID_PRIVATE_KEY 格式不正确（应为 32 字节的 base64url 字符串），请用 `pnpm vapid:keys` 重新生成";
+  }
+  if (RAW_SUBJECT && !isValidSubject(RAW_SUBJECT)) {
+    return `VAPID_SUBJECT 格式不正确（当前值：${RAW_SUBJECT}），请填写 mailto:you@example.com 或 https://你的域名`;
+  }
+  return null;
+}
+
+/** null = 还未初始化过 web-push */
+let vapidReady: boolean | null = null;
+let vapidReason: string | null = null;
+
+/**
+ * 初始化 web-push 的 VAPID 信息。
+ * 注意：这里绝不向外抛错——配置有问题只返回 false，
+ * 避免一个可选的推送功能把文章发布等其它接口一起拖垮。
+ */
+function ensureVapid(): boolean {
+  if (vapidReady === true) return true;
+  if (vapidReady === false) return false;
+
+  const invalid = validateConfig();
+  if (invalid) {
+    vapidReady = false;
+    vapidReason = invalid;
+    return false;
+  }
+
+  try {
+    webpush.setVapidDetails(VAPID_SUBJECT, RAW_PUBLIC_KEY, RAW_PRIVATE_KEY);
+    vapidReady = true;
+    vapidReason = null;
+    return true;
+  } catch (err) {
+    vapidReady = false;
+    vapidReason = `VAPID 配置无效：${
+      err instanceof Error ? err.message : String(err)
+    }`;
+    console.error("[push] setVapidDetails failed:", err);
+    return false;
+  }
+}
+
+/** 获取当前推送配置状态（不会抛错） */
+export function getPushStatus(): PushConfigStatus {
+  const configured = ensureVapid();
+  return {
+    configured,
+    publicKey: configured ? RAW_PUBLIC_KEY : "",
+    reason: configured ? null : vapidReason,
+  };
 }
 
 export function getVapidPublicKey(): string {
-  return VAPID_PUBLIC_KEY;
+  return getPushStatus().publicKey;
+}
+
+/** 判断错误是否为「订阅表不存在」 */
+export function isMissingPushTableError(err: unknown): boolean {
+  const code = (err as { code?: string } | null)?.code;
+  if (code === "P2021" || code === "P2022") return true;
+  const message = err instanceof Error ? err.message : String(err ?? "");
+  return (
+    /push_subscription/i.test(message) &&
+    /(does not exist|不存在|Unknown table)/i.test(message)
+  );
 }
 
 export interface PushMessage {
@@ -27,6 +143,8 @@ export interface PushMessage {
 
 export interface PushBroadcastResult {
   configured: boolean;
+  /** 未启用时的原因，可直接展示 */
+  reason: string | null;
   /** 当前订阅总数 */
   total: number;
   /** 成功送达的数量 */
@@ -72,15 +190,17 @@ export async function broadcastPush(
   message: PushMessage = {},
   siteUrl?: string
 ): Promise<PushBroadcastResult> {
+  const status = getPushStatus();
   const result: PushBroadcastResult = {
-    configured: isPushConfigured,
+    configured: status.configured,
+    reason: status.reason,
     total: 0,
     sent: 0,
     removed: 0,
     failed: 0,
   };
 
-  if (!isPushConfigured) return result;
+  if (!status.configured) return result;
 
   const subscriptions = await prisma.pushSubscription.findMany({
     select: { id: true, endpoint: true, p256dh: true, auth: true },
@@ -109,13 +229,19 @@ export async function broadcastPush(
     } catch (err: unknown) {
       const statusCode = (err as { statusCode?: number } | null)?.statusCode;
       if (statusCode === 404 || statusCode === 410) {
-        // 浏览器端已取消订阅或已过期，清理掉这条记录
-        await prisma.pushSubscription.deleteMany({ where: { id: sub.id } });
-        result.removed += 1;
+        // 浏览器端已取消订阅或已过期，清理掉这条记录（清理失败不影响其它订阅）
+        try {
+          await prisma.pushSubscription.deleteMany({ where: { id: sub.id } });
+          result.removed += 1;
+        } catch (cleanupErr) {
+          result.failed += 1;
+          console.error("push subscription cleanup failed:", cleanupErr);
+        }
       } else {
         result.failed += 1;
         console.error(
           "push send failed:",
+          statusCode ? `[${statusCode}]` : "",
           err instanceof Error ? err.message : err
         );
       }
@@ -138,8 +264,10 @@ export async function notifyPostPublished(
   siteUrl?: string
 ): Promise<PushBroadcastResult> {
   if (!post?.title || !post?.slug) {
+    const status = getPushStatus();
     return {
-      configured: isPushConfigured,
+      configured: status.configured,
+      reason: status.reason,
       total: 0,
       sent: 0,
       removed: 0,

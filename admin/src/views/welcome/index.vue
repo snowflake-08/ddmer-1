@@ -11,7 +11,10 @@ import Segmented, { type OptionsType } from "@/components/ReSegmented";
 import { chartData as staticChartData, barChartData as staticBarChartData, latestNewsData as staticLatestNewsData } from "./data";
 import {
   getWelcomeStats,
+  getPushStatus,
+  readApiError,
   sendUpdatePush,
+  type PushStatus,
   type WelcomeChartItem,
   type WelcomeStats,
   type WelcomeLatestItem
@@ -60,6 +63,7 @@ const loading = ref(false);
 const pushTitle = ref("");
 const pushBody = ref("");
 const pushSending = ref(false);
+const pushStatus = ref<PushStatus | null>(null);
 
 /** 手动给所有订阅用户发送“网站更新”通知 */
 async function sendPush() {
@@ -70,13 +74,35 @@ async function sendPush() {
       title: pushTitle.value,
       body: pushBody.value
     });
-    message(`已推送给 ${res?.total ?? 0} 位订阅用户`, { type: "success" });
+    const sent = res?.sent ?? 0;
+    const failed = res?.failed ?? 0;
+    message(
+      failed > 0
+        ? `已送达 ${sent} 个订阅（${failed} 个发送失败）`
+        : `已送达 ${sent} 个浏览器订阅`,
+      { type: failed > 0 ? "warning" : "success" }
+    );
     pushTitle.value = "";
     pushBody.value = "";
+    loadPushStatus();
   } catch (e: any) {
-    message(e?.message ?? "推送失败，请检查 VAPID 配置", { type: "error" });
+    message(readApiError(e, "推送失败，请检查 VAPID 配置"), { type: "error" });
   } finally {
     pushSending.value = false;
+  }
+}
+
+/** 读取推送开关状态与订阅人数 */
+async function loadPushStatus() {
+  try {
+    pushStatus.value = await getPushStatus();
+  } catch (err) {
+    console.error("[welcome] load push status failed:", err);
+    pushStatus.value = {
+      configured: false,
+      reason: readApiError(err, "读取推送状态失败"),
+      subscribers: null
+    };
   }
 }
 
@@ -119,6 +145,7 @@ async function loadWelcome() {
 
 onMounted(() => {
   loadWelcome();
+  loadPushStatus();
 });
 </script>
 
@@ -127,6 +154,18 @@ onMounted(() => {
     <el-card shadow="never" class="mb-4.5 push-card">
       <div class="flex flex-wrap items-center gap-3">
         <span class="text-md font-medium shrink-0">更新推送</span>
+        <el-tag
+          :type="pushStatus?.configured ? 'success' : 'info'"
+          effect="light"
+        >
+          {{
+            pushStatus === null
+              ? "检测中…"
+              : pushStatus.configured
+                ? `已启用 · ${pushStatus.subscribers ?? 0} 个订阅`
+                : "未启用"
+          }}
+        </el-tag>
         <el-input
           v-model="pushTitle"
           placeholder="通知标题（留空自动填充）"
@@ -140,12 +179,23 @@ onMounted(() => {
           style="width: 22rem"
           @keyup.enter="sendPush"
         />
-        <el-button type="primary" :loading="pushSending" @click="sendPush">
+        <el-button
+          type="primary"
+          :loading="pushSending"
+          :disabled="pushStatus ? !pushStatus.configured : false"
+          @click="sendPush"
+        >
           发送给订阅用户
         </el-button>
       </div>
       <p class="mt-2 text-sm text-text_color_regular">
         发布新文章时会自动通知订阅用户；对说说、照片等其他更新，可在此手动推送一条通知。
+      </p>
+      <p
+        v-if="pushStatus && !pushStatus.configured"
+        class="mt-1 text-sm text-red-500"
+      >
+        未启用原因：{{ pushStatus.reason || "未知" }}
       </p>
     </el-card>
 

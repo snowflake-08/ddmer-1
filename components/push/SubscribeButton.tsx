@@ -16,14 +16,43 @@ function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   return bytes;
 }
 
+/** 读取服务端公钥；未开启推送时返回 null 与原因 */
+async function fetchVapidKey(): Promise<
+  { ok: true; publicKey: string } | { ok: false; reason: string }
+> {
+  try {
+    const resp = await fetch("/api/push/vapid-public-key", {
+      cache: "no-store",
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) {
+      return {
+        ok: false,
+        reason:
+          (typeof data?.error === "string" && data.error) ||
+          "站点暂未开启浏览器通知",
+      };
+    }
+    const publicKey =
+      typeof data?.publicKey === "string" ? data.publicKey.trim() : "";
+    if (!publicKey) return { ok: false, reason: "站点暂未开启浏览器通知" };
+    return { ok: true, publicKey };
+  } catch {
+    return { ok: false, reason: "网络异常，暂时无法开启通知" };
+  }
+}
+
 /**
- * 极简订阅按钮：打开网站几秒后，若浏览器支持且尚未订阅，
+ * 极简订阅按钮：打开网站几秒后，若浏览器支持、服务端已开启推送且尚未订阅，
  * 在右下角低调出现，点击即可开启网站更新的浏览器通知。
+ * 服务端没有配置 VAPID 时不会出现，避免用户点了必然失败。
  */
 export default function SubscribeButton() {
   const [visible, setVisible] = useState(false);
   const [state, setState] = useState<ButtonState>("idle");
+  const [errorText, setErrorText] = useState("");
   const aliveRef = useRef(true);
+  const vapidKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -38,6 +67,15 @@ export default function SubscribeButton() {
     aliveRef.current = true;
 
     (async () => {
+      // 先确认服务端已开启推送，未开启就完全不打扰访客
+      const key = await fetchVapidKey();
+      if (cancelled) return;
+      if (!key.ok) {
+        console.info(`[push] 未显示订阅按钮：${key.reason}`);
+        return;
+      }
+      vapidKeyRef.current = key.publicKey;
+
       try {
         // 提前注册，让后面真正订阅时能立即使用
         await navigator.serviceWorker.register("/sw.js");
@@ -78,6 +116,7 @@ export default function SubscribeButton() {
   const handleSubscribe = useCallback(async () => {
     if (state === "busy") return;
     setState("busy");
+    setErrorText("");
     try {
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
@@ -95,11 +134,14 @@ export default function SubscribeButton() {
           }
         }
 
-        const keyResp = await fetch("/api/push/vapid-public-key");
-        if (!keyResp.ok) {
-          throw new Error("推送服务未启用");
+        let publicKey = vapidKeyRef.current;
+        if (!publicKey) {
+          const key = await fetchVapidKey();
+          if (!key.ok) throw new Error(key.reason);
+          publicKey = key.publicKey;
+          vapidKeyRef.current = publicKey;
         }
-        const { publicKey } = await keyResp.json();
+
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicKey),
@@ -116,7 +158,10 @@ export default function SubscribeButton() {
         }),
       });
       if (!saveResp.ok) {
-        throw new Error("保存订阅失败");
+        const data = await saveResp.json().catch(() => null);
+        throw new Error(
+          (typeof data?.error === "string" && data.error) || "保存订阅失败"
+        );
       }
 
       setState("done");
@@ -125,14 +170,18 @@ export default function SubscribeButton() {
       }, 1600);
     } catch (err) {
       console.error("订阅失败:", err);
+      setErrorText(err instanceof Error ? err.message : "开启失败");
       setState("error");
       setTimeout(() => {
         if (aliveRef.current) {
           setState((prev) => (prev === "error" ? "idle" : prev));
         }
-      }, 2400);
+      }, 4000);
     }
   }, [state]);
+
+  const shortError =
+    errorText.length > 22 ? `${errorText.slice(0, 22)}…` : errorText;
 
   const label =
     state === "busy"
@@ -140,7 +189,7 @@ export default function SubscribeButton() {
       : state === "done"
         ? "已开启更新提醒"
         : state === "error"
-          ? "开启失败，点击重试"
+          ? shortError || "开启失败，点击重试"
           : "开启更新提醒";
 
   return (
@@ -153,7 +202,11 @@ export default function SubscribeButton() {
           exit={{ opacity: 0, y: 14 }}
           transition={{ duration: 0.3 }}
           onClick={handleSubscribe}
-          title="网站有更新时通过浏览器通知提醒我"
+          title={
+            state === "error" && errorText
+              ? errorText
+              : "网站有更新时通过浏览器通知提醒我"
+          }
           aria-label="开启更新提醒"
           className="fixed bottom-6 right-4 z-[70] inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/50 bg-white/80 px-4 py-2 text-sm text-slate-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/90 md:right-6"
         >

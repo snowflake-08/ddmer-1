@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import {
+  isMissingPushTableError,
+  PUSH_TABLE_MISSING_HINT,
+} from "@/app/lib/push";
 
 interface ParsedSubscription {
   endpoint: string;
@@ -60,6 +64,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("POST /api/push/subscribe error:", err);
+    if (isMissingPushTableError(err)) {
+      return NextResponse.json(
+        { error: PUSH_TABLE_MISSING_HINT },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: "保存订阅失败" }, { status: 500 });
   }
 }
@@ -77,6 +87,12 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("DELETE /api/push/subscribe error:", err);
+    if (isMissingPushTableError(err)) {
+      return NextResponse.json(
+        { error: PUSH_TABLE_MISSING_HINT },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: "取消订阅失败" }, { status: 500 });
   }
 }
