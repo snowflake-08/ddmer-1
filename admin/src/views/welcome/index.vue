@@ -67,7 +67,7 @@ const pushStatus = ref<PushStatus | null>(null);
 
 /** 手动给所有订阅用户发送“网站更新”通知 */
 async function sendPush() {
-  if (pushSending.value) return;
+  if (pushSending.value || !pushStatus.value?.configured) return;
   pushSending.value = true;
   try {
     const res = await sendUpdatePush({
@@ -182,7 +182,7 @@ onMounted(() => {
         <el-button
           type="primary"
           :loading="pushSending"
-          :disabled="pushStatus ? !pushStatus.configured : false"
+          :disabled="!pushStatus?.configured"
           @click="sendPush"
         >
           发送给订阅用户

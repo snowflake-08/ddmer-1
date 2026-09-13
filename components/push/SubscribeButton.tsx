@@ -1,10 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Bell, BellRing } from "lucide-react";
 
 type ButtonState = "idle" | "busy" | "done" | "error";
+
+async function waitForWorker(): Promise<ServiceWorkerRegistration> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("通知服务启动超时，请刷新后重试")), 15000);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const cleaned = base64.replace(/=+$/, "");
@@ -43,12 +57,9 @@ async function fetchVapidKey(): Promise<
 }
 
 /**
- * 极简订阅按钮：打开网站几秒后，若浏览器支持、服务端已开启推送且尚未订阅，
- * 在右下角低调出现，点击即可开启网站更新的浏览器通知。
- * 服务端没有配置 VAPID 时不会出现，避免用户点了必然失败。
+ * 保留通知入口，权限或兼容性问题在点击时提示。
  */
 export default function SubscribeButton() {
-  const [visible, setVisible] = useState(false);
   const [state, setState] = useState<ButtonState>("idle");
   const [errorText, setErrorText] = useState("");
   const aliveRef = useRef(true);
@@ -62,16 +73,14 @@ export default function SubscribeButton() {
       "Notification" in window;
     if (!supported) return;
 
-    let delayTimer: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
     aliveRef.current = true;
 
     (async () => {
-      // 先确认服务端已开启推送，未开启就完全不打扰访客
+      // Preload the public key without requesting notification permission.
       const key = await fetchVapidKey();
       if (cancelled) return;
       if (!key.ok) {
-        console.info(`[push] 未显示订阅按钮：${key.reason}`);
         return;
       }
       vapidKeyRef.current = key.publicKey;
@@ -80,26 +89,19 @@ export default function SubscribeButton() {
         // 提前注册，让后面真正订阅时能立即使用
         await navigator.serviceWorker.register("/sw.js");
       } catch {
-        // 非 HTTPS 或浏览器不支持时静默关闭
+        return;
       }
       if (cancelled) return;
 
       try {
-        const registration = await navigator.serviceWorker.ready;
+        const registration = await waitForWorker();
         const subscription =
           await registration.pushManager.getSubscription();
         if (cancelled) return;
-        // 已订阅或已被用户屏蔽时不再打扰
-        if (subscription || Notification.permission === "denied") return;
-
-        if (Notification.permission === "granted") {
-          setVisible(true);
-        } else {
-          delayTimer = setTimeout(() => {
-            if (!cancelled && Notification.permission === "default") {
-              setVisible(true);
-            }
-          }, 3500);
+        // Retain the entry so a failed subscription save can be retried.
+        if (subscription) setState("done");
+        if (Notification.permission === "denied") {
+          setErrorText("通知权限已关闭，请在浏览器的网站设置中允许通知");
         }
       } catch {
         // 获取订阅状态失败（例如环境不支持），静默关闭
@@ -109,7 +111,6 @@ export default function SubscribeButton() {
     return () => {
       cancelled = true;
       aliveRef.current = false;
-      if (delayTimer) clearTimeout(delayTimer);
     };
   }, []);
 
@@ -118,22 +119,23 @@ export default function SubscribeButton() {
     setState("busy");
     setErrorText("");
     try {
+      if (!window.isSecureContext) throw new Error("请通过 HTTPS 访问网站后开启通知");
+      if (!("Notification" in window) || !("PushManager" in window) || !("serviceWorker" in navigator)) {
+        throw new Error("当前浏览器不支持通知；iPhone/iPad 请在 Safari 中添加到主屏幕后打开（iOS 16.4+）");
+      }
+      // Safari requires requesting permission directly from the click gesture.
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        throw new Error("请在浏览器的网站设置中允许通知后重试");
+      }
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
         registration = await navigator.serviceWorker.register("/sw.js");
       }
+      registration = await waitForWorker();
 
       let subscription = await registration.pushManager.getSubscription();
       if (!subscription) {
-        if (Notification.permission !== "granted") {
-          const permission = await Notification.requestPermission();
-          if (permission !== "granted") {
-            setState("idle");
-            setVisible(false);
-            return;
-          }
-        }
-
         let publicKey = vapidKeyRef.current;
         if (!publicKey) {
           const key = await fetchVapidKey();
@@ -165,9 +167,6 @@ export default function SubscribeButton() {
       }
 
       setState("done");
-      setTimeout(() => {
-        if (aliveRef.current) setVisible(false);
-      }, 1600);
     } catch (err) {
       console.error("订阅失败:", err);
       setErrorText(err instanceof Error ? err.message : "开启失败");
@@ -180,21 +179,18 @@ export default function SubscribeButton() {
     }
   }, [state]);
 
-  const shortError =
-    errorText.length > 22 ? `${errorText.slice(0, 22)}…` : errorText;
-
   const label =
     state === "busy"
       ? "正在开启…"
       : state === "done"
         ? "已开启更新提醒"
         : state === "error"
-          ? shortError || "开启失败，点击重试"
+          ? "开启失败，点击重试"
           : "开启更新提醒";
 
   return (
-    <AnimatePresence>
-      {visible && (
+        <div className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] max-w-[calc(100vw-2rem)] md:right-6">
+        {errorText && <p role="status" className="mb-2 w-64 max-w-full rounded-lg bg-white p-3 text-sm text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100">{errorText}</p>}
         <motion.button
           type="button"
           initial={{ opacity: 0, y: 14 }}
@@ -207,8 +203,9 @@ export default function SubscribeButton() {
               ? errorText
               : "网站有更新时通过浏览器通知提醒我"
           }
-          aria-label="开启更新提醒"
-          className="fixed bottom-6 right-4 z-[70] inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/50 bg-white/80 px-4 py-2 text-sm text-slate-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/90 md:right-6"
+          aria-label={state === "done" ? "已开启更新提醒" : "开启更新提醒"}
+          disabled={state === "busy"}
+          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-white/50 bg-white/80 px-4 py-2 text-sm text-slate-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/90"
         >
           {state === "busy" ? (
             <span className="size-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
@@ -219,7 +216,6 @@ export default function SubscribeButton() {
           )}
           <span>{label}</span>
         </motion.button>
-      )}
-    </AnimatePresence>
+        </div>
   );
 }

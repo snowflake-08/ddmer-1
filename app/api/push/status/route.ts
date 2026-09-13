@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      configured: status.configured,
+      configured: status.configured && hint === null,
       reason: status.reason ?? hint,
       subscribers,
     });

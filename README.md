@@ -45,8 +45,9 @@
 2. 运行 `pnpm install` 后执行 `pnpm vapid:keys` 生成密钥。
 3. 把生成的 `VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY` 与
    `VAPID_SUBJECT`（形如 `mailto:you@example.com`）填入 `.env`。
-4. 重新部署即可。订阅按钮只在 HTTPS 且支持推送的浏览器中出现；
-   通知需要浏览器运行在 https（本地 localhost 除外）。
+4. Vercel 部署需把三个变量添加到项目的 Production 环境，然后重新部署；本地 `.env` 不会自动同步到 Vercel。
+   本地或服务器可以执行 `pnpm push:setup` 将新密钥写入 `.env`，已有密钥不会被覆盖。
+5. 通知需要 HTTPS（localhost 除外）。iPhone/iPad 需要 iOS 16.4+，在 Safari 中添加到主屏幕后，从主屏幕打开并开启通知。
 
 订阅用户可以在浏览器「网站设置 → 通知」里随时关闭；后台「首页」也有
 一个「更新推送」入口，可手动给所有订阅用户发送通知。
@@ -63,7 +64,7 @@
 | VAPID_SUBJECT 格式不正确 | 只写了邮箱、少了 `mailto:` | 改成 `mailto:you@example.com` |
 | 无权限 | 当前登录的不是管理员 | 用管理员账号登录后台 |
 
-没有配置 VAPID 时，前台不会显示订阅按钮，文章发布等其它功能也不受影响。
+通知入口在电脑和手机端保持可见；配置、权限或兼容性问题会给出提示，文章发布等其它功能不受影响。
 
 ## 开发
 
