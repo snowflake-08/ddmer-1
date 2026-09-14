@@ -126,8 +126,8 @@ export default function SubscribeButton() {
         if (isAppleMobile) {
           throw new Error("iPhone/iPad 需 iOS/iPadOS 16.4 或更新版本。请在 Safari 中添加到主屏幕，再从主屏幕打开网站开启通知。");
         }
-        if (/Android/i.test(navigator.userAgent)) {
-          throw new Error("当前浏览器不支持网页推送。请将网址复制到最新版 Chrome、Edge 或 Firefox 打开，再点击开启更新提醒并允许通知；微信、QQ 等应用内浏览器请使用“在浏览器中打开”。");
+        if (!/Macintosh|Mac OS X/i.test(navigator.userAgent) && !/^Mac/i.test(navigator.platform)) {
+          throw new Error("当前浏览器不支持订阅，请用手机浏览器打开添加订阅推送功能");
         }
         throw new Error("当前浏览器不支持网页推送。请使用最新版 Chrome、Edge 或 Firefox 打开本站，再点击开启更新提醒并允许通知。");
       }
