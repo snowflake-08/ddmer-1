@@ -251,7 +251,7 @@ export default function SubscribeButton() {
 
   return (
         <div
-          className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2 md:right-6"
+          className="fixed right-4 bottom-[calc(9rem+env(safe-area-inset-bottom))] z-[70] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2 md:right-6"
           onPointerDownCapture={resetCollapseTimer}
           onKeyDownCapture={(event) => {
             if (event.key === "Escape") {
@@ -266,7 +266,7 @@ export default function SubscribeButton() {
           ref={panelRef}
           hidden={!expanded}
           aria-label="更新提醒设置"
-          className="max-h-[calc(100dvh-10rem-env(safe-area-inset-bottom))] w-80 max-w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900"
+          className="max-h-[calc(100dvh-14rem-env(safe-area-inset-bottom))] w-80 max-w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900"
         >
         <details
           className="mb-3 text-sm leading-6 text-gray-800 dark:text-gray-100"
