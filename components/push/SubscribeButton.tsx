@@ -121,12 +121,22 @@ export default function SubscribeButton() {
     try {
       if (!window.isSecureContext) throw new Error("请通过 HTTPS 访问网站后开启通知");
       if (!("Notification" in window) || !("PushManager" in window) || !("serviceWorker" in navigator)) {
-        throw new Error("当前浏览器不支持通知；iPhone/iPad 请在 Safari 中添加到主屏幕后打开（iOS 16.4+）");
+        const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        if (isAppleMobile) {
+          throw new Error("iPhone/iPad 需 iOS/iPadOS 16.4 或更新版本。请在 Safari 中添加到主屏幕，再从主屏幕打开网站开启通知。");
+        }
+        if (/Android/i.test(navigator.userAgent)) {
+          throw new Error("当前浏览器不支持网页推送。请将网址复制到最新版 Chrome、Edge 或 Firefox 打开，再点击开启更新提醒并允许通知；微信、QQ 等应用内浏览器请使用“在浏览器中打开”。");
+        }
+        throw new Error("当前浏览器不支持网页推送。请使用最新版 Chrome、Edge 或 Firefox 打开本站，再点击开启更新提醒并允许通知。");
       }
       // Safari requires requesting permission directly from the click gesture.
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        throw new Error("请在浏览器的网站设置中允许通知后重试");
+        throw new Error(permission === "denied"
+          ? "通知权限已关闭，请在浏览器的本站设置中允许通知，并在设备系统设置中允许该浏览器发送通知，然后重试。"
+          : "尚未允许通知，请再次点击开启更新提醒，并在浏览器的授权提示中选择允许。");
       }
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
