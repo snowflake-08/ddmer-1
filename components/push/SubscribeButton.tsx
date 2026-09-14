@@ -6,6 +6,35 @@ import { Bell, BellRing } from "lucide-react";
 
 type ButtonState = "idle" | "busy" | "done" | "error";
 
+function subscriptionHelp(reason: "unsupported" | "denied"): string {
+  const ua = navigator.userAgent;
+  const appleMobile = /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (appleMobile) {
+    return reason === "unsupported"
+      ? "iPhone/iPad 需 iOS/iPadOS 16.4 或更新版本。请在 Safari 中添加到主屏幕，再从主屏幕打开网站开启通知。"
+      : "通知权限已关闭。请在系统设置 → 通知中找到本站并允许通知，再从主屏幕打开本站重试。";
+  }
+  const mobile = /Android|HarmonyOS|HUAWEI|HONOR/i.test(ua);
+  const mac = /Macintosh|Mac OS X/i.test(ua) || /^Mac/i.test(navigator.platform);
+  if (reason === "unsupported") {
+    if (mobile) {
+      return "当前浏览器不支持订阅。\n1. 在微信、QQ 等应用内，请点右上角菜单，选择“在浏览器中打开”；没有此选项时，复制网址到手机浏览器。\n2. 更新手机浏览器后重试；仍不支持可尝试最新版 Edge 或 Firefox。\n3. 点击“开启更新提醒”，选择“允许”。支持情况因手机系统和浏览器而异；仍不可用时可在电脑上订阅。";
+    }
+    return mac
+      ? "当前浏览器不支持订阅。\n1. 在 Mac 上更新 Safari，或使用最新版 Chrome、Edge、Firefox 打开本站。\n2. 使用普通窗口（不要使用无痕窗口）。\n3. 点击“开启更新提醒”，在提示中选择“允许”。无需换用手机。"
+      : "当前浏览器不支持订阅。\n1. Windows 用户请复制本站网址，用最新版 Microsoft Edge 打开；也可使用 Chrome 或 Firefox。\n2. 使用普通窗口（不要使用无痕窗口）。\n3. 点击“开启更新提醒”，在提示中选择“允许”。无需换用手机。";
+  }
+  if (mobile) {
+    return "通知权限已关闭。\n1. 在浏览器的本站设置中，将“通知”改为“允许”。\n2. 华为、小米等手机：打开系统设置，搜索“通知”，找到当前浏览器并开启“允许通知”（名称可能因系统版本不同）。\n3. 返回本站刷新，再点“开启更新提醒”。";
+  }
+  if (mac) {
+    const safari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|OPR/i.test(ua);
+    return `通知权限已关闭。\n1. ${safari ? "打开 Safari → 设置 → 网站 → 通知，找到本站并选择“允许”。" : "点击地址栏左侧的网站设置图标，将本站“通知”改为“允许”。"}\n2. 打开 Mac 系统设置 → 通知，允许当前浏览器或本站发送通知。\n3. 返回本站刷新，再点“开启更新提醒”。`;
+  }
+  return "通知权限已关闭。\n1. 点击地址栏左侧的网站设置图标，将本站“通知”改为“允许”。\n2. Windows 设置 → 系统 → 通知中，开启通知并允许当前浏览器发送通知。\n3. 返回本站刷新，再点“开启更新提醒”。";
+}
+
 async function waitForWorker(): Promise<ServiceWorkerRegistration> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -101,7 +130,7 @@ export default function SubscribeButton() {
         // Retain the entry so a failed subscription save can be retried.
         if (subscription) setState("done");
         if (Notification.permission === "denied") {
-          setErrorText("通知权限已关闭，请在浏览器的网站设置中允许通知");
+          setErrorText(subscriptionHelp("denied"));
         }
       } catch {
         // 获取订阅状态失败（例如环境不支持），静默关闭
@@ -121,21 +150,13 @@ export default function SubscribeButton() {
     try {
       if (!window.isSecureContext) throw new Error("请通过 HTTPS 访问网站后开启通知");
       if (!("Notification" in window) || !("PushManager" in window) || !("serviceWorker" in navigator)) {
-        const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        if (isAppleMobile) {
-          throw new Error("iPhone/iPad 需 iOS/iPadOS 16.4 或更新版本。请在 Safari 中添加到主屏幕，再从主屏幕打开网站开启通知。");
-        }
-        if (!/Macintosh|Mac OS X/i.test(navigator.userAgent) && !/^Mac/i.test(navigator.platform)) {
-          throw new Error("当前浏览器不支持订阅，请用手机浏览器打开添加订阅推送功能");
-        }
-        throw new Error("当前浏览器不支持网页推送。请使用最新版 Chrome、Edge 或 Firefox 打开本站，再点击开启更新提醒并允许通知。");
+        throw new Error(subscriptionHelp("unsupported"));
       }
       // Safari requires requesting permission directly from the click gesture.
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
         throw new Error(permission === "denied"
-          ? "通知权限已关闭，请在浏览器的本站设置中允许通知，并在设备系统设置中允许该浏览器发送通知，然后重试。"
+          ? subscriptionHelp("denied")
           : "尚未允许通知，请再次点击开启更新提醒，并在浏览器的授权提示中选择允许。");
       }
       let registration = await navigator.serviceWorker.getRegistration();
@@ -179,7 +200,9 @@ export default function SubscribeButton() {
       setState("done");
     } catch (err) {
       console.error("订阅失败:", err);
-      setErrorText(err instanceof Error ? err.message : "开启失败");
+      setErrorText(err instanceof Error && err.name === "NotSupportedError"
+        ? subscriptionHelp("unsupported")
+        : err instanceof Error ? err.message : "开启失败");
       setState("error");
       setTimeout(() => {
         if (aliveRef.current) {
@@ -200,7 +223,7 @@ export default function SubscribeButton() {
 
   return (
         <div className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] max-w-[calc(100vw-2rem)] md:right-6">
-        {errorText && <p role="status" className="mb-2 w-64 max-w-full rounded-lg bg-white p-3 text-sm text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100">{errorText}</p>}
+        {errorText && <p role="status" className="mb-2 max-h-[50dvh] w-80 max-w-full overflow-y-auto whitespace-pre-line break-words rounded-lg bg-white p-3 text-sm leading-6 text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100">{errorText}</p>}
         <motion.button
           type="button"
           initial={{ opacity: 0, y: 14 }}
