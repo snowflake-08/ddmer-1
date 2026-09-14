@@ -102,6 +102,23 @@ export default function SubscribeButton() {
   const [state, setState] = useState<ButtonState>("idle");
   const [errorText, setErrorText] = useState("");
   const [shortcutHelp, setShortcutHelp] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const collapseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const resetCollapseTimer = useCallback(() => {
+    clearTimeout(collapseTimer.current);
+    if (!expanded || state === "busy") return;
+    collapseTimer.current = setTimeout(() => {
+      if (panelRef.current?.contains(document.activeElement)) toggleRef.current?.focus();
+      setExpanded(false);
+    }, 30000);
+  }, [expanded, state]);
+
+  useEffect(() => {
+    resetCollapseTimer();
+    return () => clearTimeout(collapseTimer.current);
+  }, [resetCollapseTimer]);
   const aliveRef = useRef(true);
   const vapidKeyRef = useRef<string | null>(null);
 
@@ -233,9 +250,26 @@ export default function SubscribeButton() {
           : "开启更新提醒";
 
   return (
-        <div className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] max-h-[calc(100dvh-7rem-env(safe-area-inset-bottom))] max-w-[calc(100vw-2rem)] overflow-y-auto md:right-6">
+        <div
+          className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2 md:right-6"
+          onPointerDownCapture={resetCollapseTimer}
+          onKeyDownCapture={(event) => {
+            if (event.key === "Escape") {
+              setExpanded(false);
+              toggleRef.current?.focus();
+            } else resetCollapseTimer();
+          }}
+          onScrollCapture={resetCollapseTimer}
+        >
+        <div
+          id="subscription-panel"
+          ref={panelRef}
+          hidden={!expanded}
+          aria-label="更新提醒设置"
+          className="max-h-[calc(100dvh-10rem-env(safe-area-inset-bottom))] w-80 max-w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900"
+        >
         <details
-          className="mb-2 w-80 max-w-full rounded-lg bg-white p-3 text-sm leading-6 text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100"
+          className="mb-3 text-sm leading-6 text-gray-800 dark:text-gray-100"
           onToggle={(event) => {
             if (event.currentTarget.open) setShortcutHelp(desktopShortcutHelp());
           }}
@@ -246,7 +280,7 @@ export default function SubscribeButton() {
             <p className="mt-2 whitespace-pre-line">{shortcutHelp}</p>
           </div>
         </details>
-        {errorText && <p role="status" className="mb-2 max-h-[50dvh] w-80 max-w-full overflow-y-auto whitespace-pre-line break-words rounded-lg bg-white p-3 text-sm leading-6 text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100">{errorText}</p>}
+        {errorText && <p role="status" className="mb-3 whitespace-pre-line break-words text-sm leading-6 text-gray-800 dark:text-gray-100">{errorText}</p>}
         <motion.button
           type="button"
           initial={{ opacity: 0, y: 14 }}
@@ -272,6 +306,19 @@ export default function SubscribeButton() {
           )}
           <span>{label}</span>
         </motion.button>
+        </div>
+        <button
+          ref={toggleRef}
+          type="button"
+          aria-expanded={expanded}
+          aria-controls="subscription-panel"
+          aria-label={expanded ? "收起更新提醒设置" : "展开更新提醒设置"}
+          title={expanded ? "收起更新提醒设置" : "展开更新提醒设置"}
+          onClick={() => setExpanded((value) => !value)}
+          className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-md transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+        >
+          {state === "done" ? <BellRing className="size-5" /> : <Bell className="size-5" />}
+        </button>
         </div>
   );
 }
