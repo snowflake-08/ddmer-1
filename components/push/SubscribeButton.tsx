@@ -6,6 +6,16 @@ import { Bell, BellRing } from "lucide-react";
 
 type ButtonState = "idle" | "busy" | "done" | "error";
 
+function desktopShortcutHelp(): string {
+  const ua = navigator.userAgent;
+  const apple = /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua) || /^Mac/i.test(navigator.platform);
+  if (apple) return "请先在 Safari 中将本站添加到主屏幕，再从主屏幕打开并开启更新提醒";
+  if (/Android|HarmonyOS|HUAWEI|HONOR/i.test(ua)) {
+    return "1. 华为、小米等手机：先在手机浏览器中打开本站。若在微信、QQ 内，请通过右上角菜单选择“在浏览器中打开”，或复制网址到浏览器。\n2. 打开浏览器菜单，查找“添加到主屏幕”“添加到桌面”或“安装应用”，按提示确认。不同浏览器的名称和位置可能不同。\n3. 若提示需要创建桌面快捷方式的权限，请允许；没有上述选项时，可尝试支持该功能的其他浏览器。仅“收藏书签”通常不会创建桌面图标。\n4. 从桌面图标打开本站，点击“开启更新提醒”，在浏览器提示中选择“允许”。";
+  }
+  return "1. Windows 用户：使用 Edge 或 Chrome 打开本站。\n2. Edge：打开右上角“…”菜单，查找“应用” → “将此站点安装为应用”；若没有此选项，可查找“更多工具”中的固定到任务栏选项。\n3. Chrome：打开右上角“⋮”菜单，在“投放、保存和分享”中查找“创建快捷方式”，或使用“安装网页为应用”（如有）。菜单名称可能随版本变化。\n4. 按提示完成添加；若没有安装选项，也可将地址栏左侧的网站图标拖到桌面，创建快捷方式。\n5. 从新图标打开本站，点击“开启更新提醒”，选择“允许”通知。";
+}
+
 function subscriptionHelp(reason: "unsupported" | "denied"): string {
   const ua = navigator.userAgent;
   const appleMobile = /iPhone|iPad|iPod/i.test(ua) ||
@@ -91,6 +101,7 @@ async function fetchVapidKey(): Promise<
 export default function SubscribeButton() {
   const [state, setState] = useState<ButtonState>("idle");
   const [errorText, setErrorText] = useState("");
+  const [shortcutHelp, setShortcutHelp] = useState("");
   const aliveRef = useRef(true);
   const vapidKeyRef = useRef<string | null>(null);
 
@@ -222,7 +233,19 @@ export default function SubscribeButton() {
           : "开启更新提醒";
 
   return (
-        <div className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] max-w-[calc(100vw-2rem)] md:right-6">
+        <div className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[70] max-h-[calc(100dvh-7rem-env(safe-area-inset-bottom))] max-w-[calc(100vw-2rem)] overflow-y-auto md:right-6">
+        <details
+          className="mb-2 w-80 max-w-full rounded-lg bg-white p-3 text-sm leading-6 text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100"
+          onToggle={(event) => {
+            if (event.currentTarget.open) setShortcutHelp(desktopShortcutHelp());
+          }}
+        >
+          <summary className="cursor-pointer">将本站添加到主屏幕或桌面</summary>
+          <div className="max-h-[40dvh] overflow-y-auto break-words">
+            <p className="mt-2">建议将本站添加到主屏幕或桌面，方便随时访问。更新提醒需浏览器支持，并允许通知权限；添加快捷方式不会自动开启订阅。</p>
+            <p className="mt-2 whitespace-pre-line">{shortcutHelp}</p>
+          </div>
+        </details>
         {errorText && <p role="status" className="mb-2 max-h-[50dvh] w-80 max-w-full overflow-y-auto whitespace-pre-line break-words rounded-lg bg-white p-3 text-sm leading-6 text-gray-800 shadow-lg dark:bg-gray-900 dark:text-gray-100">{errorText}</p>}
         <motion.button
           type="button"
